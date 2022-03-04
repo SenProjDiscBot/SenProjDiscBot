@@ -72,8 +72,8 @@ class timeclock(commands.Cog):
         current_time = now.strftime("%H:%M").split(":")
         c_hours = int(current_time[0])
         c_minutes = int(current_time[1])
-        time = c_hours - hours
-        time = time + ((c_minutes - minutes)/60)
+        n_time = c_hours - hours # important that "n_time isn't 'time', because 'time' is being used as a
+        n_time = n_time + ((c_minutes - minutes)/60) #variable name for a datetime object in another file
     record = "out " + str(now.strftime("%d/%m/%Y %H:%M") + "\n")
     file.write(record)
     file.flush()
@@ -104,14 +104,13 @@ class timeclock(commands.Cog):
       elif words[0] == "out":
         outs = outs + int(hours) + (int(minutes)/ 60)
         out_count+= 1
-    time = outs - ins
+    n_time = outs - ins # Changed from 'time' to 'n_time'
     file.close()
     if in_count != out_count:
       await ctx.send("Please clock out before checking total hours worked.")
       return
 
-    await ctx.send("You have worked a total of " + str(time) + " hours.")
+    await ctx.send("You have worked a total of " + str(n_time) + " hours.") #changed from 'time' to 'n_time'
 
 def setup(client):
   client.add_cog(timeclock(client))
-  
