@@ -1,5 +1,5 @@
 from datetime import datetime
-from datetime import time
+import time
 from discord.ext import commands
 from discord import DMChannel
 
@@ -28,11 +28,17 @@ class reminder(commands.Cog):
       return msg.author == ctx.author and msg.channel == dm
     
 
-    await dm.send("When would you like your reminder in minutes? ")
+    await dm.send("When would you like your reminder(in minutes?) ")
     rt = await self.client.wait_for("message", check=check)
-    reminder_time = rt.content
-
-    await ctx.send("what would you like to be reminded of?")
+    reminder_time = rt.content    
+    await dm.send("what would you like to be reminded of?")
+    rc = await self.client.wait_for("message", check=check)
+    reminder_content = rc.content
+    await dm.send("you will be reminded to " + reminder_content + " in " + reminder_time + " minutes! ")
+    convertedTime = (int(reminder_time) * 60)#might need to convert to float
+    time.sleep(convertedTime)
+    await dm.send("EZ-Bot was set to remind you to: ")
+    await dm.send(reminder_content)
     if await self.guild_null(ctx):
       return
 
