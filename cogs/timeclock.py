@@ -108,7 +108,7 @@ class timeclock(commands.Cog):
     # check if command is not in direct messages
     if await self.guild_null(ctx):
       return
-
+    print(str(ctx.guild.owner.id))
     # helper function that checks if a message is in the authors dm channel
     #def check(msg):
     #  return msg.author == ctx.author and msg.channel == dm
@@ -118,7 +118,6 @@ class timeclock(commands.Cog):
     # create direct message channel with author
     dm = await ctx.author.create_dm()
 
-    print(ctx.guild.fetch_members())
     # check if discord user has completed shifts to edit
     if not await self.db.check_complete(ctx):
       await dm.send("You do not have any completed shifts to edit.")
@@ -304,22 +303,22 @@ class timeclock(commands.Cog):
             await boss_dm.send(name + " would like to change a shift on " + new_dt.strftime('%A %B %d'))
             await boss_dm.send("Old shift: " + str(dt_change.strftime('%I:%M:%S %p') + " to " + out_time.strftime('%I:%M:%S %p')))
             await boss_dm.send("New shift: " + str(new_dt.strftime('%I:%M:%S %p') + " to " + out_time.strftime('%I:%M:%S %p')))
-            await dm.send("Would you like to allow this?", components = [
+            await boss_dm.send("Would you like to allow this?", components = [
               Button(label="Yes", style="3", custom_id="yes"),
               Button(label="No", style="4", custom_id="no")
             ])
             #await response
+            dm.send("Please wait while we aprove this with your boss.")
             boss_choice = await self.client.wait_for("button_click", check = lambda i: i.custom_id == "yes" or "no")
             # clear spent Buttons
             await self.clear_last_msg(boss_dm)
             if boss_choice.component.custom_id == "yes":
-              boss_dm.send("Thank you, I will let " + name + " know their shift has been changed!")
+              await boss_dm.send("Thank you, I will let " + name + " know their shift has been changed!")
             else:
-              boss_dm.send("Thank you, I will let " + name + " know their shift has not been changed and to contact you if they have any questions as to why.")
-              dm.send("Your boss has declined your timeclock change. Please contact them if you have any concerns as to why.")
+              await boss_dm.send("Thank you, I will let " + name + " know their shift has not been changed and to contact you if they have any questions as to why.")
+              await dm.send("Your boss has declined your timeclock change. Please contact them if you have any concerns as to why.")
               return
-        
-
+  
             # update record with new in_time datetime and total seconds of the shift
             total = out_time - new_dt
             seconds = total.seconds
@@ -338,24 +337,22 @@ class timeclock(commands.Cog):
           await boss_dm.send(name + " would like to change a shift on " + new_dt.strftime('%A %B %d'))
           await boss_dm.send("Old shift: " + in_time.strftime('%I:%M:%S %p') + " to " + dt_change.strftime('%I:%M:%S %p'))
           await boss_dm.send("New shift: " + in_time.strftime('%I:%M:%S %p') + " to " + new_dt.strftime('%I:%M:%S %p'))
-          await dm.send("Would you like to allow this?", components = [
+          await boss_dm.send("Would you like to allow this?", components = [
             Button(label="Yes", style="3", custom_id="yes"),
             Button(label="No", style="4", custom_id="no")
           ])
           #await response
+          dm.send("Please wait while we aprove this with your boss.")
           boss_choice = await self.client.wait_for("button_click", check = lambda i: i.custom_id == "yes" or "no")
           # clear spent Buttons
           await self.clear_last_msg(boss_dm)
           if boss_choice.component.custom_id == "yes":
-            boss_dm.send("Thank you, I will let " + name + " know their shift has been changed!")
+            await boss_dm.send("Thank you, I will let " + name + " know their shift has been changed!")
           else:
-            boss_dm.send("Thank you, I will let " + name + " know their shift has not been changed and to contact you if they have any questions as to why.")
-            dm.send("Your boss has declined your timeclock change. Please contact them if you have any concerns as to why.")
+            await boss_dm.send("Thank you, I will let " + name + " know their shift has not been changed and to contact you if they have any questions as to why.")
+            await dm.send("Your boss has declined your timeclock change. Please contact them if you have any concerns as to why.")
             return
         
-
-  
-  
           # update record with new out_time datetime and total seconds of the shift
           total = new_dt - in_time
           seconds = total.seconds
