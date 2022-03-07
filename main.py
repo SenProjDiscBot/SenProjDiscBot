@@ -11,7 +11,7 @@ intents = discord.Intents.default()
 intents.members = True
 # initializes client all commands start with !
 # case_inseitive ensures case doesn't matter
-client = commands.Bot(command_prefix="!", case_insensitive = True)
+client = commands.Bot(command_prefix="!", case_insensitive = True, intents = intents)
 
 # event: prints when bot goes online 
 @client.event
