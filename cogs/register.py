@@ -1,7 +1,5 @@
 from datetime import datetime
 from datetime import time
-from pickle import NONE
-
 from discord import DMChannel
 from discord.ext import commands
 import pymongo
@@ -11,6 +9,10 @@ class register(commands.Cog):
 
   def __init__(self,client):
     self.client = client
+    # connect to mongo db
+    print("Register connecting to mongoDB....")
+    self.db = connect_to_db()
+    print("Register connected to database!")
 
 
 
@@ -30,11 +32,10 @@ class register(commands.Cog):
     discord_id = str(ctx.author)
   
     #connect to mongoDB
-    db = connect_to_db(ctx)
-    records = db.get_employee_records()
+    records = self.db.get_employee_records(ctx)
 
     #check if discord user is already in the database
-    if await db.check_active(ctx):
+    if await self.db.check_active(ctx):
       await ctx.send("You are already in this database.")
       return
 
@@ -77,11 +78,10 @@ class register(commands.Cog):
     #get user discord id
     discord_id = str(ctx.author)
 
-    #connect to mongoDB
-    db = connect_to_db(ctx)
-    records = db.get_employee_records()
+    #get mongoDB table
+    records = self.db.get_employee_records(ctx)
     #check if discord user is already in the database
-    if not await db.check_active(ctx):
+    if not await self.db.check_active(ctx):
       return
 
     #open a dm channel with user

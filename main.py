@@ -6,6 +6,9 @@ import json
 import os
 # gets commands class from discord library
 from discord.ext import commands
+# activate intents
+intents = discord.Intents.default()
+intents.members = True
 # initializes client all commands start with !
 # case_inseitive ensures case doesn't matter
 client = commands.Bot(command_prefix="!", case_insensitive = True)
