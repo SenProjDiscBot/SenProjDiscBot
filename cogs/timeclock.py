@@ -41,7 +41,7 @@ class timeclock(commands.Cog):
     #check if discord user is in the database
     if not await self.db.check_active(ctx):
       await dm.send("You are not registered with this discord server.")
-      await dm.send("Please use %register to sign up before clocking in")
+      await dm.send("Please use !register to sign up before clocking in")
       return
 
     #check if user is already clocked in
@@ -368,6 +368,9 @@ class timeclock(commands.Cog):
     
   @commands.command(name = 'time')
   async def printtime(self, ctx):
+    # check if command is not in direct messages
+    if await self.guild_null(ctx):
+      return
     # open dm channel
     dm = await ctx.author.create_dm()
     # get completed shifts table
