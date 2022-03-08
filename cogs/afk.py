@@ -57,7 +57,7 @@ class afkCog(commands.Cog):
       # Checks if user has [AFK] in their name
       if "[AFK]" in userName:
         # Checks if user was trying to run the afk command again
-        if ";afk" in message.content:
+        if "!afk" in message.content:
           pass
         else:
           # Takes out the [AFK] from the users name
