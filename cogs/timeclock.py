@@ -410,6 +410,9 @@ class timeclock(commands.Cog):
     
   @commands.command(name = 'time')
   async def printtime(self, ctx):
+    # check if command is not in direct messages
+    if await self.guild_null(ctx):
+      return
     # open dm channel
     dm = await ctx.author.create_dm()
     # get completed shifts table
