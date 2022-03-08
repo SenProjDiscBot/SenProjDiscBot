@@ -308,7 +308,7 @@ class timeclock(commands.Cog):
               Button(label="No", style="4", custom_id="no")
             ])
             #await response
-            dm.send("Please wait while we aprove this with your boss.")
+            await dm.send("Please wait while we aprove this with your boss.")
             boss_choice = await self.client.wait_for("button_click", check = lambda i: i.custom_id == "yes" or "no")
             # clear spent Buttons
             await self.clear_last_msg(boss_dm)
@@ -342,7 +342,7 @@ class timeclock(commands.Cog):
             Button(label="No", style="4", custom_id="no")
           ])
           #await response
-          dm.send("Please wait while we aprove this with your boss.")
+          await dm.send("Please wait while we aprove this with your boss.")
           boss_choice = await self.client.wait_for("button_click", check = lambda i: i.custom_id == "yes" or "no")
           # clear spent Buttons
           await self.clear_last_msg(boss_dm)
