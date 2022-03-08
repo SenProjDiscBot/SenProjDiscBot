@@ -142,6 +142,15 @@ class timeclock(commands.Cog):
       await dm.send("You do not have any completed shifts to edit.")
       return
     
+    # verify user has set their timezone
+    users = self.db.get_employee_records(ctx)
+    userdata = list(users.find({'timezone' : {'$exists':False}, 'discord_id' : discord_id }))
+    for user in userdata:
+      print(user["discord_id"])
+    if len(userdata) > 0:
+      await dm.send("Please use the 'edit' command to update your timezone before clocking out.")
+      return
+    
     # get timezone
     users = self.db.get_employee_records(ctx)
     userdata = users.find_one({'discord_id':discord_id})
