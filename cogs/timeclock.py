@@ -169,7 +169,7 @@ class timeclock(commands.Cog):
       # format shift data, create SelectOption, append to list of options (key based on seconds from epoch of in_time)
       
 
-      intime = shift["out_time"]
+      intime = shift["in_time"]
       outtime = shift["out_time"]
       tz = pytz.timezone("UTC")
       utcin = tz.localize(intime)
