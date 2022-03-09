@@ -5,4 +5,5 @@ discord-py-slash-command
 pymongo
 discord-components
 pytz
-dsnpython?
+dsnpython
+asyncio
