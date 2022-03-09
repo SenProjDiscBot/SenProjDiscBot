@@ -61,7 +61,7 @@ class timeclock(commands.Cog):
     userdata = users.find_one({'discord_id':discord_id})
     timezone = userdata['timezone']
     timezone_pytz = pytz.timezone(timezone)
-    in_time = datetime.now()
+    in_time = datetime.now().astimezone(pytz.timezone('UTC'))
     #create employee dict
     new_employee = {
         'discord_id' : discord_id,
@@ -93,18 +93,22 @@ class timeclock(commands.Cog):
     # verify user has set their timezone
     users = self.db.get_employee_records(ctx)
     userdata = list(users.find({'timezone' : {'$exists':False}, 'discord_id' : discord_id }))
+  
     if len(userdata) > 0:
       await dm.send("Please use the 'edit' command to update your timezone before clocking out.")
       return
-    
     records = self.db.get_active_shifts(ctx)
     shift_data = records.find_one({'discord_id' : discord_id})
+    
     userdata = users.find_one({'discord_id':discord_id})
     timezone = userdata['timezone']
     timezone_pytz = pytz.timezone(timezone)
-    in_time = shift_data["in_time"]
-    out_time = datetime.now()
- 
+    in_time_data = shift_data["in_time"]
+    out_time = datetime.now().astimezone(pytz.timezone('UTC'))
+
+    tz = pytz.timezone("UTC")
+    in_time = tz.localize(in_time_data)
+
     total = out_time - in_time
     seconds = total.seconds
 
@@ -141,7 +145,7 @@ class timeclock(commands.Cog):
     if not await self.db.check_complete(ctx):
       await dm.send("You do not have any completed shifts to edit.")
       return
-    
+
     # verify user has set their timezone
     users = self.db.get_employee_records(ctx)
     userdata = list(users.find({'timezone' : {'$exists':False}, 'discord_id' : discord_id }))
@@ -150,7 +154,7 @@ class timeclock(commands.Cog):
     if len(userdata) > 0:
       await dm.send("Please use the 'edit' command to update your timezone before clocking out.")
       return
-    
+
     # get timezone
     users = self.db.get_employee_records(ctx)
     userdata = users.find_one({'discord_id':discord_id})
@@ -160,21 +164,27 @@ class timeclock(commands.Cog):
     # get 14 most recent completed shifts table associated with ctx author
     records = self.db.get_complete_shifts(ctx)
     shifts = records.find({'discord_id': discord_id})
-    count = 0
     shift_data = []
     for shift in shifts:
-      count += 1
-      if count > 14:
-        break
       # format shift data, create SelectOption, append to list of options (key based on seconds from epoch of in_time)
-      outstr = shift["out_time"].astimezone(tzp).strftime("%I:%M %p")
-      shift_data.append(SelectOption(label=str(shift["in_time"].astimezone(tzp).strftime('%A %B %d from %I:%M %p to ' + outstr)), value= str(shift["in_time"].timestamp())))
+      
 
+      intime = shift["out_time"]
+      outtime = shift["out_time"]
+      tz = pytz.timezone("UTC")
+      utcin = tz.localize(intime)
+      utcout = tz.localize(outtime)
+      instr = utcin.astimezone(tzp).strftime("%I:%M %p")
+      outstr = utcout.astimezone(tzp).strftime("%I:%M %p")
+
+      shift_data.append(SelectOption(label=instr + ' to ' + outstr, value= str(shift["in_time"].timestamp())))
+
+    recent_14 = shift_data[-14:]
     # build a Select to choose a shift for user to edit and send in dms
     await dm.send("Which shift would you like to edit?", components = [
         Select(
           placeholder = "Shifts",
-          options = shift_data,
+          options = recent_14,
           custom_id= 'shift'
         )
     ])
@@ -182,10 +192,13 @@ class timeclock(commands.Cog):
     shiftans = await self.client.wait_for("select_option", check=lambda i: i.custom_id == "shift" and i.user == ctx.author)
 
     # use seconds from epoch of chosen option, convert back to date time, use this to search for associated out time
-    in_time = datetime.fromtimestamp(float(shiftans.values[0]))
-    out_data = records.find_one({"in_time" : in_time, 'discord_id' : discord_id})
-    out_time = out_data["out_time"]
-   
+    in_time_raw = datetime.fromtimestamp(float(shiftans.values[0]))
+    out_data = records.find_one({"in_time" : in_time_raw, 'discord_id' : discord_id})
+    out_time_raw = out_data["out_time"]
+    tz = pytz.timezone("UTC")
+    in_time = tz.localize(in_time_raw)
+    out_time = tz.localize(out_time_raw)
+
     # clear spent Select
     await self.clear_last_msg(dm)
 
@@ -214,7 +227,6 @@ class timeclock(commands.Cog):
       dt_change = out_time
       await dm.send("You are editing your out time (" + str(out_time.astimezone(tzp).strftime('%I:%M:%S %p on %A %B %d')) + ")")
     
-
     # begin while loop that allows for user verification and re-trial before final submittion      
     try_again = True
     while try_again:
@@ -224,18 +236,18 @@ class timeclock(commands.Cog):
       if choice1.values[0] == "in":
         # 12 AM
         # only append if hour is less than that of out time
-        if int(out_time.strftime('%H')) >= 0:
+        if int(out_time.astimezone(tzp).strftime('%H')) >= 0:
           ops.append(SelectOption(label="12 AM", value=0))
         # 1-11 AM
         for x in range(11):
           label = x+1
           strlable = str(label) + " AM"
           # only append if hour is less than that of out time
-          if int(out_time.strftime('%H')) >= label:
+          if int(out_time.astimezone(tzp).strftime('%H')) >= label:
             ops.append(SelectOption(label=strlable, value=x + 1))
         # 12 PM
         # only append if hour is less than that of out time
-        if int(out_time.strftime('%H')) >= 12:
+        if int(out_time.astimezone(tzp).strftime('%H')) >= 12:
           ops.append(SelectOption(label="12 PM", value=12))
         # 1-11 PM
         for x in range(11):
@@ -243,23 +255,23 @@ class timeclock(commands.Cog):
           val = x + 13
           strlable = str(label) + " PM"
           # only append if hour is less than that of out time
-          if int(out_time.strftime('%H')) >= val:
+          if int(out_time.astimezone(tzp).strftime('%H')) >= val:
             ops.append(SelectOption(label=strlable, value=val))
       else:
         # 12 AM
         # only append if hour is greater than that of in time
-        if int(in_time.strftime('%H')) <= 0:
+        if int(in_time.astimezone(tzp).strftime('%H')) <= 0:
           ops.append(SelectOption(label="12 AM", value=0))
         # 1-11 AM
         for x in range(11):
           label = x+1
           strlable = str(label) + " AM"
           # only append if hour is greater than that of in time
-          if int(in_time.strftime('%H')) <= label:
+          if int(in_time.astimezone(tzp).strftime('%H')) <= label:
             ops.append(SelectOption(label=strlable, value=x + 1))
         # 12 PM
         # only append if hour is greater than that of in time
-        if int(in_time.strftime('%H')) <= 12:
+        if int(in_time.astimezone(tzp).strftime('%H')) <= 12:
           ops.append(SelectOption(label="12 PM", value=12))
         # 1-11 PM
         for x in range(11):
@@ -267,7 +279,7 @@ class timeclock(commands.Cog):
           val = x + 13
           strlable = str(label) + " PM"
           # only append if hour is greater than that of in time
-          if int(in_time.strftime('%H')) <= val:
+          if int(in_time.astimezone(tzp).strftime('%H')) <= val:
             ops.append(SelectOption(label=strlable, value=val))      
       
       # build and send hours Select
@@ -280,12 +292,14 @@ class timeclock(commands.Cog):
       ])
       # await response
       hours_interaction = await self.client.wait_for("select_option", check=lambda i: i.custom_id == "hours" and i.user == ctx.author)
-      hourstr = str(hours_interaction.values[0])
+      hoursint = int(hours_interaction.values[0])
+      if hoursint > 12:
+        hoursint = hoursint-12
+      hourstr = str(hoursint)
       
       # clear spend Select
       await self.clear_last_msg(dm)
       
-     
       # Build and send minutes Select with hours from previous answer displayed for clarity
       await dm.send("", components = [
         Select(
@@ -302,9 +316,11 @@ class timeclock(commands.Cog):
       # create new datetime value with users responses
       hours = int(hours_interaction.values[0])
       minutes = int(minutes_interaction.values[0])
-      new_dt = dt_change.replace(hour= hours, minute= minutes, second=0)
-      tz = pytz.timezone('UTC')
+      dt_change_localized = dt_change.astimezone(tzp)
+      new_dt = dt_change_localized.replace(hour= hours, minute= minutes, second=0)
+      tz = pytz.timezone("UTC")
       new_dt = new_dt.astimezone(tz)
+   
       # clear spend Select
       await self.clear_last_msg(dm)
 
@@ -423,15 +439,19 @@ class timeclock(commands.Cog):
     userdata = users.find_one({'discord_id':discord_id})
     timezone = userdata['timezone']
     tzp = pytz.timezone(timezone)
+    utc = pytz.timezone('UTC')
     # get shifts associated with author of ctx 
     shifts = records.find({'discord_id': discord_id})
     total = 0
     shift_data = []
     for shift in shifts:
-      # format out time
-      outstr = shift["out_time"].astimezone(tzp).strftime("%I:%M %p on %A %m-%d")
+      # localize times to utc, convert to user timezone, format
+      in_time = utc.localize(shift["in_time"])
+      out_time = utc.localize(shift["out_time"])
+      instr = in_time.astimezone(tzp).strftime('%A %m-%d-%Y from %I:%M %p')
+      outstr = out_time.astimezone(tzp).strftime("%I:%M %p on %A %m-%d")
       # get total seconds, minutes, hours in shift
-      s = (shift["out_time"] - shift["in_time"]).total_seconds()
+      s = int(shift["seconds_worked"])
       hours, remainder = divmod(s, 3600)
       minutes, seconds = divmod(remainder, 60)
       # add seconds to running total
@@ -439,7 +459,7 @@ class timeclock(commands.Cog):
       # format shift data
       data =  '{:02}:{:02}:{:02}'.format(int(hours), int(minutes), int(seconds))
       # append shift data
-      shift_data.append(str(data + " on " + shift["in_time"].astimezone(tzp).strftime('%A %m-%d-%Y from %I:%M %p to ' + outstr)))
+      shift_data.append(str(data + ' on ' + instr + ' to ' + outstr))
 
     # send shift information in dm  
     for shift in shift_data:
@@ -455,6 +475,10 @@ class timeclock(commands.Cog):
   @commands.command(name = 'clean')
   async def clean(self, ctx):
   # development command that has the bot delete its messages in ctx authors dm's
+    print('Commonly used time-zones:', 
+      pytz.common_timezones, '\n')
+    print('Commonly used time-zones-set:',
+      pytz.common_timezones_set, '\n')
     dm = await ctx.author.create_dm()
     async for x in dm.history(limit = 1000):
       if x.author == self.client.user:
