@@ -175,7 +175,7 @@ class timeclock(commands.Cog):
       utcin = tz.localize(intime)
       utcout = tz.localize(outtime)
       instr = utcin.astimezone(tzp).strftime("%I:%M %p")
-      outstr = utcout.astimezone(tzp).strftime("%I:%M %p")
+      outstr = utcout.astimezone(tzp).strftime("%I:%M %p on %A %B %d")
 
       shift_data.append(SelectOption(label=instr + ' to ' + outstr, value= str(shift["in_time"].timestamp())))
 
