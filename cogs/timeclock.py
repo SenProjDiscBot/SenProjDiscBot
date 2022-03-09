@@ -61,7 +61,6 @@ class timeclock(commands.Cog):
     userdata = users.find_one({'discord_id':discord_id})
     timezone = userdata['timezone']
     timezone_pytz = pytz.timezone(timezone)
-    timezone = userdata['timezone']
     in_time = datetime.now().astimezone(pytz.timezone('UTC'))
     #create employee dict
     new_employee = {
