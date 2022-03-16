@@ -1,12 +1,17 @@
-""" Senior Project Discord Bot - Sara White, Danny Blake, Shane Bowman"""
+""" Senior Project Discord Bot - Sara White"""
+
+
 import discord
 import json
 import os
 # gets commands class from discord library
 from discord.ext import commands
-# initializes client all commands start with %
-# case_insensitive ensures case doesn't matter
-client = commands.Bot(command_prefix="%", case_insensitive = True)
+# activate intents
+intents = discord.Intents.default()
+intents.members = True
+# initializes client all commands start with !
+# case_inseitive ensures case doesn't matter
+client = commands.Bot(command_prefix="!", case_insensitive = True, intents = intents)
 
 # event: prints when bot goes online 
 @client.event
