@@ -2,6 +2,7 @@ from datetime import datetime
 import time
 from discord.ext import commands
 from discord import DMChannel
+import asyncio
 
 
 class reminder(commands.Cog):
@@ -36,7 +37,7 @@ class reminder(commands.Cog):
     reminder_content = rc.content
     await dm.send("you will be reminded to " + reminder_content + " in " + reminder_time + " minutes! ")
     convertedTime = (int(reminder_time) * 60)#might need to convert to float
-    time.sleep(convertedTime)
+    await asyncio.sleep(convertedTime)
     await dm.send("EZ-Bot was set to remind you to: ")
     await dm.send(reminder_content)
     if await self.guild_null(ctx):
@@ -47,4 +48,3 @@ class reminder(commands.Cog):
 
 def setup(client):
   client.add_cog(reminder(client))
-  

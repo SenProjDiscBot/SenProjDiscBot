@@ -1,0 +1,84 @@
+from operator import truediv
+from typing import Collection
+from discord.ext import commands
+import pymongo
+
+class connect_to_db():
+    
+
+    def __init__(self):
+        #connect to mongoDB
+        self.client = pymongo.MongoClient(
+        "mongodb+srv://Danny:qwert123@cluster0.tx7kv.mongodb.net/Cluster0?retryWrites=true&w=majority")
+        
+
+    def get_employee_records(self, ctx):
+        return self.client.get_database(str(ctx.guild.id)).employee_records
+
+
+    def get_active_shifts(self, ctx):
+        return self.client.get_database(str(ctx.guild.id)).active_shifts    
+
+
+    def get_complete_shifts(self, ctx):
+        return self.client.get_database(str(ctx.guild.id)).complete_shifts
+
+
+    def get_afk(self,ctx):
+        return self.client.get_database(str(ctx.guild.id)).afk
+    
+
+    async def check_in(self, ctx):
+    # checks if author of ctx is clocked in
+        #get user discord id
+        discord_id = str(ctx.author)
+        records = self.client.get_database(str(ctx.guild.id)).active_shifts
+
+        #check if discord user is already in the database
+        slice = len(list(records.find({'discord_id' : discord_id})))
+
+        if slice > 0:
+            return True
+
+        return False
+
+
+    async def check_active(self, ctx):
+    # checks if author of ctx is a registered user in this servers system
+        #get user discord id
+        discord_id = str(ctx.author)
+        records = self.client.get_database(str(ctx.guild.id)).employee_records
+
+        #check if discord user is already in the database
+        slice = len(list(records.find({'discord_id' : discord_id})))
+
+        if slice > 0:
+            return True
+
+        return False
+
+
+    async def check_complete(self, ctx):
+    # checks if author of ctx has any completed shifts
+        #get user discord id
+        discord_id = str(ctx.author)
+        records = self.client.get_database(str(ctx.guild.id)).complete_shifts
+
+        #check if discord user is already in the database
+        slice = len(list(records.find({'discord_id' : discord_id})))
+
+        if slice > 0:
+            return True
+
+        return False
+    
+    
+    async def check_afk(self, ctx, id):
+    # checks if id has an afk message set in the guild of ctx
+        afk = self.client.get_database(str(ctx.guild.id)).afk
+        slice = list(afk.find({'discord_id' : id}))
+
+        if slice > 0:
+            return True
+
+        return False
