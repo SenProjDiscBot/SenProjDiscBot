@@ -343,7 +343,6 @@ class timeclock(commands.Cog):
          return
 
       elif choice.component.custom_id == "send":
-        ###################### FIX TIMESTAMP BUG AND TURN BACK ON #############################################################################################################################################################################################################################################################################
         if self.db.check_timestamp_collision(new_dt, in_time, out_time, discord_id, guild_id):
           await dm.send("This new time would collide with a previous entry in your timesheet")
           continue
