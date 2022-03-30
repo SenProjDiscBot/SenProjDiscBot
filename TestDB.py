@@ -1,4 +1,3 @@
-from cgi import test
 from datetime import datetime
 import unittest
 import pytz
@@ -163,13 +162,13 @@ class TestDB(unittest.TestCase):
         timezone = 'UTC'
         records = self.db.get_employee_records(guild_id)
         new_employee = {
-                'discord_id' : discord_id,
-                'name_first' : first,
-                'name_last' : last,
-                'timezone' : timezone,
-                'manager' : False
+                'discord_id': discord_id,
+                'name_first': first,
+                'name_last': last,
+                'timezone': timezone,
+                'manager': False
             }
-        if len(list(records.find({'discord_id' : discord_id}))) == 0:
+        if len(list(records.find({'discord_id': discord_id}))) == 0:
             records.insert_one(new_employee)
         discord_id = 'LADY'
         guild_id = 'TEST'
@@ -177,35 +176,36 @@ class TestDB(unittest.TestCase):
         last = 'LADY'
         timezone = 'UTC'
         new_employee = {
-                'discord_id' : discord_id,
-                'name_first' : first,
-                'name_last' : last,
-                'timezone' : timezone,
-                'manager' : True
+                'discord_id': discord_id,
+                'name_first': first,
+                'name_last': last,
+                'timezone': timezone,
+                'manager': True
             }
 
-        if len(list(records.find({'discord_id' : discord_id}))) == 0:
+        if len(list(records.find({'discord_id': discord_id}))) == 0:
             records.insert_one(new_employee)
 
         out_time_first_shift = datetime(2022, 2, 22, 16, 00, 00, 0)
         in_time_first_shift = datetime(2022, 2, 22, 8, 00, 00, 0)
         in_time_second_shift = datetime(2022, 2, 23, 8, 00, 00, 0)
 
-        if not self.db.check_in(discord_id, guild_id):   
-           new_in_time = {
-                'discord_id' : discord_id,
-                'in_time' : in_time_second_shift}
-           ins = self.db.get_active_shifts(guild_id)
-           ins.insert_one(new_in_time)
+        if not self.db.check_in(discord_id, guild_id):
+            new_in_time = {
+                'discord_id': discord_id,
+                'in_time': in_time_second_shift
+                }
+            ins = self.db.get_active_shifts(guild_id)
+            ins.insert_one(new_in_time)
 
         if not self.db.check_complete(discord_id, guild_id):
             time_clock = {
-                'discord_id' : discord_id,
-                'in_time' : in_time_first_shift,
-                'out_time' : out_time_first_shift,
-                'seconds_worked' : (out_time_first_shift - in_time_first_shift).total_seconds(),
-                'comments' : '',
-                'paid' : False
+                'discord_id': discord_id,
+                'in_time': in_time_first_shift,
+                'out_time': out_time_first_shift,
+                'seconds_worked': (out_time_first_shift - in_time_first_shift).total_seconds(),
+                'comments': '',
+                'paid': False
             }
             complete = self.db.get_complete_shifts(guild_id)
             complete.insert_one(time_clock)
