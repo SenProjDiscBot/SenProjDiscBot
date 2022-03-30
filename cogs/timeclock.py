@@ -220,7 +220,7 @@ class timeclock(commands.Cog):
                 placeholder="In or Out",
                 options=[
                     SelectOption(
-                        label="In: " + str(in_time.astimezone(tzp).strftime('%I:%M %p on %A %B %d')), 
+                        label="In: " + str(in_time.astimezone(tzp).strftime('%I:%M %p on %A %B %d')),
                         value="in"
                     ),
                     SelectOption(
@@ -374,39 +374,43 @@ class timeclock(commands.Cog):
                         await boss_dm.send(name + " would like to change a shift on " + new_dt.strftime('%A %B %d'))
                         await boss_dm.send(
                             "Old shift: " +
-                            str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') +
-                            " to " + out_time.astimezone(tzp).strftime('%I:%M:%S %p')))
+                            str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') + " to " + 
+                            out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
+                        )
                         await boss_dm.send(
                             "New shift: " +
-                            str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') +
-                            " to " + out_time.astimezone(tzp).strftime('%I:%M:%S %p')))
+                            str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') + " to " +
+                            out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
+                        )
                         await boss_dm.send("Would you like to allow this?", components=[
                             Button(label="Yes", style="3", custom_id="yes"),
                             Button(label="No", style="4", custom_id="no")
                         ])
                         # await response
                         await dm.send("Please wait while we aprove this with your boss.")
-                        boss_choice = await self.client.wait_for("button_click",
-                                check=lambda i: i.custom_id == "yes" or "no")
+                        boss_choice = await self.client.wait_for(
+                          "button_click", check=lambda i: i.custom_id == "yes" or "no")
                         # clear spent Buttons
                         await self.clear_last_msg(boss_dm)
                         if boss_choice.component.custom_id == "yes":
                             await boss_dm.send("Thank you, I will let " + name + " know their shift has been changed!")
                             await self.post_mng_log(
-                                ctx, 
+                                ctx,
                                 ctx.guild.owner.name +
                                 " has aproved a time clock change for " +
                                 name)
                             await self.post_mng_log(
-                                ctx, "Old shift: " +
-                                str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') +
-                                " to " +
-                                out_time.astimezone(tzp).strftime('%I:%M:%S %p')))
+                                ctx,
+                                "Old shift: " +
+                                str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') + " to " +
+                                out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
+                            )
                             await self.post_mng_log(
-                                ctx, "New shift: " +
-                                str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') +
-                                " to " +
-                                out_time.astimezone(tzp).strftime('%I:%M:%S %p')))
+                                ctx,
+                                "New shift: " +
+                                str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') + " to " +
+                                out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
+                            )
                         else:
                             await boss_dm.send("Thank you, I will let " + name + " know their shift has not \
                                   been changed and to contact you if they have any questions as to why.")
@@ -425,14 +429,16 @@ class timeclock(commands.Cog):
                             str(new_dt.strftime('%A %B %d'))
                         )
                         await dm.send(
-                            "Old shift: " + 
+                            "Old shift: " +
                             str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') +
-                            " to " + out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
+                            " to " +
+                            out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
                         )
                         await dm.send(
-                            "New shift: " + 
+                            "New shift: " +
                             str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') +
-                            " to " + out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
+                            " to " +
+                            out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
                         )
 
                 elif choice1.values[0] == "out":
