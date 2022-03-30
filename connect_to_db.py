@@ -23,7 +23,7 @@ class connect_to_db():
         slice = shifts.find_one(sort=[("in_time", 1)])
         return slice
 
-    def get_afk(self,guild_id):
+    def get_afk(self, guild_id):
         return self.client.get_database(str(guild_id)).afk
 
     def add_user(self, discord_id, first_name, last_name, timezone, guild_id, member_id):
@@ -49,10 +49,10 @@ class connect_to_db():
             print(record['out_time'].strftime('%m:%d:%Y-%H:%M:%S:%f') + " " + out_time.strftime('%m:%d:%Y-%H:%M:%S:%f'))
             if record['in_time'].strftime('%m:%d:%Y-%H:%M:%S:%f') == in_time.strftime('%m:%d:%Y-%H:%M:%S:%f') and \
                 record['out_time'].strftime('%m:%d:%Y-%H:%M:%S:%f') == out_time.strftime('%m:%d:%Y-%H:%M:%S:%f'):
-                continue
+                    continue
             if utc_timestamp >= record['in_time'] and utc_timestamp <= record['out_time']:
                 return True
-        
+
         ins = self.get_active_shifts(guild_id)
         user_ins = ins.find({'discord_id': discord_id})
         for record in user_ins:
@@ -95,9 +95,9 @@ class connect_to_db():
 
     def update_all_manager_values(self, guild_id):
         records = self.client.get_database(str(guild_id)).employee_records
-        tars = records.find({'manager': {'$exists':False}})
+        tars = records.find({'manager': {'$exists': False}})
         for employee in tars:
-            records.update_one({'discord_id': employee['discord_id']} , {"$set": {'manager' : False}})
+            records.update_one({'discord_id': employee['discord_id']}, {"$set": {'manager': False}})
 
     def clock_user_in(self, user_id, guild_id):
         if self.check_active(user_id, guild_id):
