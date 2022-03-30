@@ -48,18 +48,18 @@ class afkCog(commands.Cog):
         # Gets users nickname
         userName = message.author.nick
 
-      if userName != None:
-          # Checks if user has [AFK] in their name
-          if "[AFK]" in userName:
-              # Checks if user was trying to run the afk command again
-              if "!afk" in message.content:
-                  pass
-              else:
-                  # Takes out the [AFK] from the users name
-                  newNick = message.author.nick.replace('[AFK]', '')
-                  await message.author.edit(nick=newNick)
+        if userName != None:
+            # Checks if user has [AFK] in their name
+            if "[AFK]" in userName:
+                # Checks if user was trying to run the afk command again
+                if "!afk" in message.content:
+                    pass
+                else:
+                    # Takes out the [AFK] from the users name
+                    newNick = message.author.nick.replace('[AFK]', '')
+                    await message.author.edit(nick=newNick)
 
-                  await message.channel.send(f"{message.author.mention} is no longer AFK")
+                    await message.channel.send(f"{message.author.mention} is no longer AFK")
 
 def setup(client):
     client.add_cog(afkCog(client))
