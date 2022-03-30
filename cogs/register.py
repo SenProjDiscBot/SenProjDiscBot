@@ -292,12 +292,12 @@ class register(commands.Cog):
         records.update_one(
             {'discord_id': discord_id},
             {"$set":
-            {
-            'member_id': ctx.author.id,
-            'name_first': first_name,
-            'name_last': last_name,
-            'timezone': timezone
-            }
+                {
+                    'member_id': ctx.author.id,
+                    'name_first': first_name,
+                    'name_last': last_name,
+                    'timezone': timezone
+                }
             }
         )
         # post verfication in discord channel
