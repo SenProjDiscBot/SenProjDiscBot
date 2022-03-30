@@ -232,8 +232,8 @@ class timeclock(commands.Cog):
             )
         ])
         # await response
-        choice1 = await self.client.wait_for("select_option",
-                check=lambda i: i.custom_id == "inout" and i.user == ctx.author)
+        choice1 = await self.client.wait_for(
+          "select_option", check=lambda i: i.custom_id == "inout" and i.user == ctx.author)
 
         # clear spent Select
         await self.clear_last_msg(dm)
@@ -281,8 +281,8 @@ class timeclock(commands.Cog):
                 )
             ])
             # await response
-            hours_interaction = await self.client.wait_for("select_option",
-                    check=lambda i: i.custom_id == "hours" and i.user == ctx.author)
+            hours_interaction = await self.client.wait_for(
+              "select_option", check=lambda i: i.custom_id == "hours" and i.user == ctx.author)
             hoursint = int(hours_interaction.values[0])
             if choice1.values[0] == "in":
                 hourstr = (out_time.astimezone(tzp) - timedelta(hours=hoursint)).strftime('%I')
@@ -306,8 +306,8 @@ class timeclock(commands.Cog):
                 )
             ])
 
-            minutes_interaction = await self.client.wait_for("select_option",
-                    check=lambda i: i.custom_id == "minutes" and i.user == ctx.author)
+            minutes_interaction = await self.client.wait_for(
+              "select_option", check=lambda i: i.custom_id == "minutes" and i.user == ctx.author)
             # create new datetime value with users responses
             hours = int(hours_interaction.values[0])
             minutes = int(minutes_interaction.values[0])
@@ -329,8 +329,8 @@ class timeclock(commands.Cog):
             ])
 
             # await response
-            choice = await self.client.wait_for("button_click",
-                check=lambda i: i.custom_id == "send" or "again" or "exit")
+            choice = await self.client.wait_for(
+              "button_click", check=lambda i: i.custom_id == "send" or "again" or "exit")
             # clear spent Buttons
             await self.clear_last_msg(dm)
             await self.clear_last_msg(dm)
@@ -373,10 +373,12 @@ class timeclock(commands.Cog):
                         boss_dm = await ctx.guild.owner.create_dm()
                         await boss_dm.send(name + " would like to change a shift on " + new_dt.strftime('%A %B %d'))
                         await boss_dm.send(
-                            "Old shift: " + str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') +
+                            "Old shift: " +
+                            str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') +
                             " to " + out_time.astimezone(tzp).strftime('%I:%M:%S %p')))
                         await boss_dm.send(
-                            "New shift: " + str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') +
+                            "New shift: " +
+                            str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') +
                             " to " + out_time.astimezone(tzp).strftime('%I:%M:%S %p')))
                         await boss_dm.send("Would you like to allow this?", components=[
                             Button(label="Yes", style="3", custom_id="yes"),
@@ -391,15 +393,19 @@ class timeclock(commands.Cog):
                         if boss_choice.component.custom_id == "yes":
                             await boss_dm.send("Thank you, I will let " + name + " know their shift has been changed!")
                             await self.post_mng_log(
-                                ctx, ctx.guild.owner.name +
-                                " has aproved a time clock change for " + name)
+                                ctx, 
+                                ctx.guild.owner.name +
+                                " has aproved a time clock change for " +
+                                name)
                             await self.post_mng_log(
                                 ctx, "Old shift: " +
-                                str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') + " to " +
+                                str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') +
+                                " to " +
                                 out_time.astimezone(tzp).strftime('%I:%M:%S %p')))
                             await self.post_mng_log(
                                 ctx, "New shift: " +
-                                str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') + " to " +
+                                str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') +
+                                " to " +
                                 out_time.astimezone(tzp).strftime('%I:%M:%S %p')))
                         else:
                             await boss_dm.send("Thank you, I will let " + name + " know their shift has not \
@@ -416,13 +422,18 @@ class timeclock(commands.Cog):
                         # post verfication in dm
                         await dm.send(
                             "Your boss has confirmed your timeclock change on " +
-                            str(new_dt.strftime('%A %B %d')))
+                            str(new_dt.strftime('%A %B %d'))
+                        )
                         await dm.send(
-                            "Old shift: " + str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') +
-                            " to " + out_time.astimezone(tzp).strftime('%I:%M:%S %p')))
+                            "Old shift: " + 
+                            str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') +
+                            " to " + out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
+                        )
                         await dm.send(
-                            "New shift: " + str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') +
-                            " to " + out_time.astimezone(tzp).strftime('%I:%M:%S %p')))
+                            "New shift: " + 
+                            str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') +
+                            " to " + out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
+                        )
 
                 elif choice1.values[0] == "out":
                     if in_time.astimezone(tzp) > new_dt.astimezone(tzp):
@@ -457,8 +468,8 @@ class timeclock(commands.Cog):
                         ])
                         # await response
                         await dm.send("Please wait while we aprove this with your boss.")
-                        boss_choice = await self.client.wait_for("button_click",
-                                check=lambda i: i.custom_id == "yes" or "no")
+                        boss_choice = await self.client.wait_for(
+                          "button_click", check=lambda i: i.custom_id == "yes" or "no")
                         # clear spent Buttons
                         await self.clear_last_msg(boss_dm)
                         if boss_choice.component.custom_id == "yes":
@@ -582,15 +593,16 @@ class timeclock(commands.Cog):
                 custom_id='Month'
             )
         ])
-        start_interaction = await self.client.wait_for("select_option",
-                check=lambda i: i.custom_id == "Month" and i.user == ctx.author)
+        start_interaction = await self.client.wait_for(
+          "select_option", check=lambda i: i.custom_id == "Month" and i.user == ctx.author)
         await self.clear_last_msg(dm)
         ppstart = start_interaction.values[0]
         start_split = ppstart.split(" ")
         start_month = start_split[0]
         start_year = start_split[1]
-        start = datetime(year=int(start_year), month=int(start_month),
-                day=1, hour=0, minute=0, second=0, microsecond=0)
+        start = datetime(
+            year=int(start_year), month=int(start_month),
+            day=1, hour=0, minute=0, second=0, microsecond=0)
 
         # get starting day
         ops = []
@@ -608,8 +620,8 @@ class timeclock(commands.Cog):
                 custom_id='Day'
             )
         ])
-        start_day_interaction = await self.client.wait_for("select_option",
-                check=lambda i: i.custom_id == "Day" and i.user == ctx.author)
+        start_day_interaction = await self.client.wait_for(
+          "select_option", check=lambda i: i.custom_id == "Day" and i.user == ctx.author)
         await self.clear_last_msg(dm)
         day = start_day_interaction.values[0]
         if day == "More":
@@ -626,15 +638,17 @@ class timeclock(commands.Cog):
                     custom_id='Day'
                 )
             ])
-            start_day_interaction = await self.client.wait_for("select_option",
-                    check=lambda i: i.custom_id == "Day" and i.user == ctx.author)
+            start_day_interaction = await self.client.wait_for(
+              "select_option", check=lambda i: i.custom_id == "Day" and i.user == ctx.author)
             await self.clear_last_msg(dm)
             day = start_day_interaction.values[0]
 
-        ppstart = datetime(year=int(start_year), month=int(start_month),
-                day= int(day), hour=0, minute=0, second=0, microsecond=0)
-        start = datetime(year=int(start_year), month=int(start_month),
-                day=1, hour=0, minute=0, second=0, microsecond=0)
+        ppstart = datetime(
+            year=int(start_year), month=int(start_month),
+            day=int(day), hour=0, minute=0, second=0, microsecond=0)
+        start = datetime(
+            year=int(start_year), month=int(start_month),
+            day=1, hour=0, minute=0, second=0, microsecond=0)
         ops = []
         while start < option_end:
             lbl = start.strftime("%B, %Y")
@@ -649,16 +663,17 @@ class timeclock(commands.Cog):
               custom_id='Month'
               )
           ])
-        end_interaction = await self.client.wait_for("select_option",
-                check=lambda i: i.custom_id == "Month" and i.user == ctx.author)
+        end_interaction = await self.client.wait_for(
+            "select_option", check=lambda i: i.custom_id == "Month" and i.user == ctx.author)
         await self.clear_last_msg(dm)
 
         ppend = end_interaction.values[0]
         end_split = ppend.split(" ")
         end_month = end_split[0]
         end_year = end_split[1]
-        start = datetime(year=int(end_year), month=int(end_month),
-                day=1, hour=0, minute=0, second=0, microsecond=0)
+        start = datetime(
+            year=int(end_year), month=int(end_month),
+            day=1, hour=0, minute=0, second=0, microsecond=0)
         if end_month == start_month:
             start = start.replace(day=int(day))
 
@@ -678,8 +693,8 @@ class timeclock(commands.Cog):
                 custom_id='Day'
             )
         ])
-        end_day_interaction = await self.client.wait_for("select_option",
-                check=lambda i: i.custom_id == "Day" and i.user == ctx.author)
+        end_day_interaction = await self.client.wait_for(
+            "select_option", check=lambda i: i.custom_id == "Day" and i.user == ctx.author)
         await self.clear_last_msg(dm)
         day = end_day_interaction.values[0]
         if day == "More":
@@ -696,13 +711,14 @@ class timeclock(commands.Cog):
                     custom_id='Day'
                 )
             ])
-            end_day_interaction = await self.client.wait_for("select_option",
-                    check=lambda i: i.custom_id == "Day" and i.user == ctx.author)
+            end_day_interaction = await self.client.wait_for(
+                "select_option", check=lambda i: i.custom_id == "Day" and i.user == ctx.author)
             await self.clear_last_msg(dm)
             day = end_day_interaction.values[0]
 
-        ppend = datetime(year=int(end_year), month=int(end_month),
-                day=int(day), hour=23, minute=59, second=59, microsecond=0)
+        ppend = datetime(
+            year=int(end_year), month=int(end_month),
+            day=int(day), hour=23, minute=59, second=59, microsecond=0)
         records = self.db.get_employee_records(guild_id)
         shifts = self.db.get_complete_shifts(guild_id)
         slice = shifts.find({"in_time": {"$gt": ppstart}, "in_time": {"$lt": ppend}})
@@ -721,7 +737,7 @@ class timeclock(commands.Cog):
             writer = csv.writer(file)
             ppst = ['Pay Period Start:', ppstart.strftime('%A %B %d %Y')]
             ppnd = ['Pay Period End:', ppend.strftime('%A %B %d %Y')]
-            blank = ['','']
+            blank = ['', '']
             header = ['Employee Name', 'Hours Worked']
             rows = [ppst, ppnd, blank, header]
             # write a row to the csv file
@@ -760,7 +776,8 @@ class timeclock(commands.Cog):
 
             # await response
             try:
-                ans = await self.client.wait_for("button_click", timeout=300, check = lambda i: i.custom_id == "out" or "remain" )
+                ans = await self.client.wait_for(
+                    "button_click", timeout=300, check=lambda i: i.custom_id == "out" or "remain")
                 await self.clear_last_msg(dm)
                 if ans.component.custom_id == "remain":
                     sleep_time = second_sleep_time
@@ -771,8 +788,10 @@ class timeclock(commands.Cog):
                 await self.clear_last_msg(dm)
                 break
 
-        self.db.clock_user_out(discord_id,guild_id)
-        await dm.send("You were clocked out due to the bot suspecting you forgot to clock out. Please edit this shift to correct your time sheet.")
+        self.db.clock_user_out(discord_id, guild_id)
+        await dm.send(
+            "You were clocked out due to the bot suspecting you forgot to clock out. \
+             Please edit this shift to correct your time sheet.")
 
     async def get_mng_log(self, ctx):
         # get channel object for manager log
@@ -812,8 +831,8 @@ class timeclock(commands.Cog):
             default = ctx.guild.default_role
 
             overwrites = {
-            default: PermissionOverwrite(read_messages=False),
-            manager_role: PermissionOverwrite(read_messages=True)
+                default: PermissionOverwrite(read_messages=False),
+                manager_role: PermissionOverwrite(read_messages=True)
             }
             channel = await ctx.guild.create_text_channel(name='timeclock-manager-log', overwrites=overwrites)
 
