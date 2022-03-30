@@ -7,15 +7,13 @@ class connect_to_db():
     def __init__(self):
         # connect to mongoDB
         self.client = pymongo.MongoClient(
-        "mongodb+srv://Danny:qwert123@cluster0.tx7kv.mongodb.net/Cluster0?retryWrites=true&w=majority")
-        
+            "mongodb+srv://Danny:qwert123@cluster0.tx7kv.mongodb.net/Cluster0?retryWrites=true&w=majority")
+
     def get_employee_records(self, guild_id):
         return self.client.get_database(str(guild_id)).employee_records
 
-
     def get_active_shifts(self, guild_id):
-        return self.client.get_database(str(guild_id)).active_shifts    
-
+        return self.client.get_database(str(guild_id)).active_shifts
 
     def get_complete_shifts(self, guild_id):
         return self.client.get_database(str(guild_id)).complete_shifts
@@ -28,7 +26,6 @@ class connect_to_db():
     def get_afk(self,guild_id):
         return self.client.get_database(str(guild_id)).afk
 
-    
     def add_user(self, discord_id, first_name, last_name, timezone, guild_id, member_id):
         # create employee dict
         if not self.check_active(discord_id, guild_id):
@@ -42,7 +39,7 @@ class connect_to_db():
             }
             records = self.client.get_database(str(guild_id)).employee_records
             records.insert_one(new_employee)
-    
+
     def check_timestamp_collision(self, utc_timestamp, in_time, out_time, discord_id, guild_id):
         records = self.get_complete_shifts(guild_id)
         user_records = records.find({'discord_id': discord_id})
@@ -50,7 +47,8 @@ class connect_to_db():
         for record in user_records:
             print(record['in_time'].strftime('%m:%d:%Y-%H:%M:%S:%f') + " " + in_time.strftime('%m:%d:%Y-%H:%M:%S:%f'))
             print(record['out_time'].strftime('%m:%d:%Y-%H:%M:%S:%f') + " " + out_time.strftime('%m:%d:%Y-%H:%M:%S:%f'))
-            if record['in_time'].strftime('%m:%d:%Y-%H:%M:%S:%f') == in_time.strftime('%m:%d:%Y-%H:%M:%S:%f') and record['out_time'].strftime('%m:%d:%Y-%H:%M:%S:%f') == out_time.strftime('%m:%d:%Y-%H:%M:%S:%f'):
+            if record['in_time'].strftime('%m:%d:%Y-%H:%M:%S:%f') == in_time.strftime('%m:%d:%Y-%H:%M:%S:%f') and \
+                record['out_time'].strftime('%m:%d:%Y-%H:%M:%S:%f') == out_time.strftime('%m:%d:%Y-%H:%M:%S:%f'):
                 continue
             if utc_timestamp >= record['in_time'] and utc_timestamp <= record['out_time']:
                 return True
@@ -101,7 +99,6 @@ class connect_to_db():
         for employee in tars:
             records.update_one({'discord_id': employee['discord_id']} , {"$set": {'manager' : False}})
 
-
     def clock_user_in(self, user_id, guild_id):
         if self.check_active(user_id, guild_id):
             if not self.check_in(user_id, guild_id):
@@ -116,34 +113,30 @@ class connect_to_db():
                 return True
         return False
 
-
     def clock_user_out(self, user_id, guild_id):
         if self.check_in(user_id, guild_id):
             actives = self.get_active_shifts(guild_id)
             records = self.get_complete_shifts(guild_id)
-            slice =  actives.find_one({'discord_id': user_id})
+            slice = actives.find_one({'discord_id': user_id})
             tz = pytz.timezone('UTC')
             in_time = tz.localize(slice['in_time'])
             out_time = datetime.now(tz=tz)
-
             total = out_time - in_time
             seconds = total.seconds
 
             data = {
-            'discord_id': user_id,
-            'in_time': in_time,
-            'out_time': out_time,
-            'seconds_worked': seconds,
-            'comment': "",
-            'paid': False
+                'discord_id': user_id,
+                'in_time': in_time,
+                'out_time': out_time,
+                'seconds_worked': seconds,
+                'comment': "",
+                'paid': False
             }
 
             actives.delete_one({'discord_id': user_id})
             records.insert_one(data)
             return True
         return False
-        
-
 
     def get_managers(self, guild_id):
         records = self.client.get_database(str(guild_id)).employee_records
@@ -164,7 +157,6 @@ class connect_to_db():
 
         return False
 
-
     def check_complete(self, user_id, guild_id):
         # checks if author of ctx has any completed shifts
         # get user discord id
@@ -178,8 +170,7 @@ class connect_to_db():
             return True
 
         return False
-    
-    
+
     def check_afk(self, guild_id, id):
         # checks if id has an afk message set in the guild of ctx
         afk = self.client.get_database(str(guild_id)).afk
