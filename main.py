@@ -1,56 +1,60 @@
 """ Senior Project Discord Bot - Sara White"""
 
-
 import discord
 import json
 import os
 # gets commands class from discord library
 from discord.ext import commands
-# activate intents
+# initializes client all commands start with %
+# case_inseitive ensures case doesn't matter
+
 intents = discord.Intents.default()
 intents.members = True
-# initializes client all commands start with !
-# case_inseitive ensures case doesn't matter
-client = commands.Bot(command_prefix="!", case_insensitive = True, intents = intents)
+client = commands.Bot(command_prefix="!", case_insensitive=True, intents=intents)
 
-# event: prints when bot goes online 
+
 @client.event
+# event: prints when bot goes online
 async def on_ready():
-  print("Login as {0.user} Sucessful!".format(client))
+   print("Login as {0.user} Sucessful!".format(client))
 
 # gets token value from .json file to start bot
-with open("token.json") as f: 
-  data = json.load(f)
-  token = data["TOKEN"]
+with open("token.json") as f:
+    data = json.load(f)
+    token = data["TOKEN"]
 
 # cogs (custom command files)
+
+
+@client.command()
 # command to load cogs to bot
-@client.command()
-async def load(ctx, filename): 
-  client.load_extension(f"cogs.{filename}")
-  await ctx.send(f"Loaded {filename}")
+async def load(ctx, filename):
+    client.load_extension(f"cogs.{filename}")
+    await ctx.send(f"Loaded {filename}")
 
+
+@client.command()
 # command to unload cogs to bot
-@client.command()
-async def unload(ctx, filename): 
-  client.unload_extension(f"cogs.{filename}")
-  await ctx.send(f"Unloaded {filename}")
+async def unload(ctx, filename):
+    client.unload_extension(f"cogs.{filename}")
+    await ctx.send(f"Unloaded {filename}")
 
-# command to reload cogs to bot
+
 @client.command()
-async def reload(ctx, filename): 
-  client.unload_extension(f"cogs.{filename}")
-  client.load_extension(f"cogs.{filename}")
-  await ctx.send(f"Reloaded {filename}")
+# command to reload cogs to bot
+async def reload(ctx, filename):
+    client.unload_extension(f"cogs.{filename}")
+    client.load_extension(f"cogs.{filename}")
+    await ctx.send(f"Reloaded {filename}")
 
 # looks for cogs file in directory
-for cogfile in os.listdir("./cogs"):
-  if cogfile.endswith(".py"):
-    if cogfile.startswith("__init__"):
-      pass
-    else: 
-      # gets file name minus the last 3 characters ().py) and loads the cog
-      client.load_extension(f"cogs.{cogfile[:-3]}")
+for cogfile in os.listdir("./src/bot/cogs"):
+    if cogfile.endswith(".py"):
+        if cogfile.startswith("__init__"):
+            pass
+        else:
+            # gets file name minus the last 3 characters ().py) and loads the cog
+            client.load_extension(f"cogs.{cogfile[:-3]}")
 
 
 client.run(token)
