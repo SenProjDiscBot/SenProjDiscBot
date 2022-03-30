@@ -373,14 +373,16 @@ class timeclock(commands.Cog):
                         boss_dm = await ctx.guild.owner.create_dm()
                         await boss_dm.send(name + " would like to change a shift on " + new_dt.strftime('%A %B %d'))
                         await boss_dm.send(
-                            "Old shift: " +
-                            str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') + " to " + 
-                            out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
+                                          "Old shift: " +
+                                          str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p')
+                                          + " to " +
+                                          out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
                         )
                         await boss_dm.send(
-                            "New shift: " +
-                            str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') + " to " +
-                            out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
+                                          "New shift: " +
+                                          str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') +
+                                          " to " +
+                                          out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
                         )
                         await boss_dm.send("Would you like to allow this?", components=[
                             Button(label="Yes", style="3", custom_id="yes"),
