@@ -16,7 +16,7 @@ client = commands.Bot(command_prefix="!", case_insensitive=True, intents=intents
 @client.event
 # event: prints when bot goes online
 async def on_ready():
-   print("Login as {0.user} Sucessful!".format(client))
+    print("Login as {0.user} Sucessful!".format(client))
 
 # gets token value from .json file to start bot
 with open("token.json") as f:
