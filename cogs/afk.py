@@ -8,16 +8,16 @@ intents.members = True
 
 class afkCog(commands.Cog):
     # Start of afk command class
-    def __init__(self,client):
+    def __init__(self, client):
         self.client = client
 
     # Start of afk command
     @commands.command()
-    async def afk(self, ctx, message = None):
+    async def afk(self, ctx, message=None):
         current_nick = ctx.author.nick
 
         # Saves users default name as their nick if they do not already have one
-        if current_nick == None:
+        if current_nick is None:
             current_nick = ctx.author.name
 
         # Checks if user was previously AFK and is trying to run the command again
@@ -29,7 +29,7 @@ class afkCog(commands.Cog):
             return
 
         # Checks if user entered a message after running .afk
-        if message == None:
+        if message is None:
             message = None
             await ctx.send(f"{ctx.author.mention} has gone afk.")
         else:
@@ -38,17 +38,17 @@ class afkCog(commands.Cog):
             await ctx.send(f"{ctx.author.mention} has gone afk {message}.")
 
         try:
-            await ctx.author.edit(nick = f"{ctx.author.name} [AFK]")
+            await ctx.author.edit(nick=f"{ctx.author.name} [AFK]")
         except:
             await ctx.send("Unable to change your name")
 
     # Reads all messages from all users
     @commands.Cog.listener()
-    async def on_message(self,message):
+    async def on_message(self, message):
         # Gets users nickname
         userName = message.author.nick
 
-        if userName != None:
+        if userName is not None:
             # Checks if user has [AFK] in their name
             if "[AFK]" in userName:
                 # Checks if user was trying to run the afk command again
@@ -61,5 +61,6 @@ class afkCog(commands.Cog):
 
                     await message.channel.send(f"{message.author.mention} is no longer AFK")
 
+                    
 def setup(client):
     client.add_cog(afkCog(client))
