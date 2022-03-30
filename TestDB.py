@@ -1,5 +1,5 @@
-import unittest
 from datetime import datetime
+import unittest
 import pytz
 from connect_to_db import connect_to_db
 
