@@ -372,17 +372,15 @@ class timeclock(commands.Cog):
                         name = emp_name["name_first"] + " " + emp_name["name_last"]
                         boss_dm = await ctx.guild.owner.create_dm()
                         await boss_dm.send(name + " would like to change a shift on " + new_dt.strftime('%A %B %d'))
-                        await boss_dm.send(
-                                          "Old shift: " +
-                                          str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p')
-                                          + " to " +
-                                          out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
+                        await boss_dm.send("Old shift: " +
+                                           str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p')
+                                           + " to " +
+                                           out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
                         )
-                        await boss_dm.send(
-                                          "New shift: " +
-                                          str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') +
-                                          " to " +
-                                          out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
+                        await boss_dm.send("New shift: " +
+                                           str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') +
+                                           " to " +
+                                           out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
                         )
                         await boss_dm.send("Would you like to allow this?", components=[
                             Button(label="Yes", style="3", custom_id="yes"),
@@ -401,17 +399,17 @@ class timeclock(commands.Cog):
                                 ctx.guild.owner.name +
                                 " has aproved a time clock change for " +
                                 name)
-                            await self.post_mng_log(
-                                ctx,
-                                "Old shift: " +
-                                str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') + " to " +
-                                out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
+                            await self.post_mng_log(ctx,
+                                                    "Old shift: " +
+                                                    str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') +
+                                                    " to " +
+                                                    out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
                             )
-                            await self.post_mng_log(
-                                ctx,
-                                "New shift: " +
-                                str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') + " to " +
-                                out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
+                            await self.post_mng_log(ctx,
+                                                    "New shift: " +
+                                                    str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') +
+                                                    " to " +
+                                                    out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
                             )
                         else:
                             await boss_dm.send("Thank you, I will let " + name + " know their shift has not \
@@ -430,17 +428,15 @@ class timeclock(commands.Cog):
                             "Your boss has confirmed your timeclock change on " +
                             str(new_dt.strftime('%A %B %d'))
                         )
-                        await dm.send(
-                            "Old shift: " +
-                            str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') +
-                            " to " +
-                            out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
+                        await dm.send("Old shift: " +
+                                      str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') +
+                                      " to " +
+                                      out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
                         )
-                        await dm.send(
-                            "New shift: " +
-                            str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') +
-                            " to " +
-                            out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
+                        await dm.send("New shift: " +
+                                      str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') +
+                                      " to " +
+                                      out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
                         )
 
                 elif choice1.values[0] == "out":
