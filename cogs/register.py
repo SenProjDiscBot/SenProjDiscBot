@@ -291,11 +291,11 @@ class register(commands.Cog):
         # store employee in the database
         records.update_one(
             {'discord_id': discord_id},
-            {"$set": 
-            {'member_id': ctx.author.id,
-            'name_first': first_name, 
-            'name_last': last_name, 
-            'timezone': timezone}}
+            {"$set":
+                {'member_id': ctx.author.id,
+                'name_first': first_name, 
+                'name_last': last_name,
+                'timezone': timezone}}
         )
 
         # post verfication in discord channel
