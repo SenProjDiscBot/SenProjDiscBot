@@ -61,7 +61,6 @@ class connect_to_db():
 
         return False
 
-    
     def check_timestamp_collision(self, utc_timestamp, discord_id, guild_id):
         records = self.get_complete_shifts(guild_id)
         user_records = records.find({'discord_id': discord_id})
