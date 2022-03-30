@@ -155,7 +155,7 @@ class register(commands.Cog):
                     if not channel_check:
                         default = ctx.guild.default_role
 
-                        overwrites={
+                        overwrites = {
                             default: PermissionOverwrite(read_messages=False),
                             manager_role: PermissionOverwrite(read_messages=True)
                         }
@@ -290,10 +290,13 @@ class register(commands.Cog):
 
         # store employee in the database
         records.update_one(
-            {'discord_id': discord_id} ,
-            {"$set": {'member_id': ctx.author.id,
-            'name_first': first_name, 'name_last': last_name, 'timezone': timezone}}
-          )
+            {'discord_id': discord_id},
+            {"$set": 
+            {'member_id': ctx.author.id,
+            'name_first': first_name, 
+            'name_last': last_name, 
+            'timezone': timezone}}
+        )
 
         # post verfication in discord channel
         await dm.send("You have updated your information.")
