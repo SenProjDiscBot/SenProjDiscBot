@@ -29,11 +29,11 @@ class reminder(commands.Cog):
         rt = await self.client.wait_for("message", check=check)    
         while True:
             try:
-              is_int = int(rt.content)
-              break
+                is_int = int(rt.content)
+                break
             except:
                 await dm.send("Please set a new reminder using an integer as input for time!")
-              return
+                return
 
         reminder_time = rt.content
         await dm.send("what would you like to be reminded of?")
