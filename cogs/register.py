@@ -1,6 +1,6 @@
-from discord import  PermissionOverwrite
+from discord import PermissionOverwrite
 from discord.ext import commands
-from discord_components import DiscordComponents, ComponentsBot, Button, SelectOption, Select
+from discord_components import DiscordComponents, SelectOption, Select
 from connect_to_db import connect_to_db
 from discord.utils import get
 
@@ -15,7 +15,7 @@ class register(commands.Cog):
     print("Register connected to database!")
 
   async def guild_null(self, ctx):
-    if ctx.guild == None:
+    if ctx.guild is None:
       await ctx.send("This command does not work in direct messages!")
       return True
     return False
@@ -52,10 +52,10 @@ class register(commands.Cog):
     last_name = ln.content
 
     # get timezone
-    await dm.send("What is your timezone?", components = [
+    await dm.send("What is your timezone?", components=[
         Select(
-          placeholder = "Timezone",
-          options = [
+          placeholder="Timezone",
+          options=[
                     SelectOption(label="MIT	Midway Islands Time	GMT-11:00", value='Pacific/Midway'),
                     SelectOption(label="HST	Hawaii Standard Time GMT-10:00", value='US/Hawaii'),
                     SelectOption(label="AST Alaska Standard Time GMT-9:00", value='US/Alaska'),
@@ -79,7 +79,7 @@ class register(commands.Cog):
                     SelectOption(label="SST	Solomon Standard Time	GMT+11:00", value='Australia/Sydney'),
                     SelectOption(label="NST	New Zealand Standard Time	GMT+12:00", value='Pacific/Fiji')
           ],
-          custom_id= 'timezone'
+          custom_id='timezone'
           )
       ])
     timezone_interaction = await self.client.wait_for("select_option", check=lambda i: i.custom_id == "timezone" and i.user == ctx.author)
@@ -103,17 +103,17 @@ class register(commands.Cog):
       records = self.db.get_employee_records(guild_id)
       ops = []
 
-      for emp in records.find({'manager' : False}):
+      for emp in records.find({'manager': False}):
         label = str(emp['name_first'] + " " + str(emp['name_last']))
-        ops.append(SelectOption(label=label,value=str(emp['discord_id'])))
- 
-      ops.append(SelectOption(label='Cancel',value='end'))
+        ops.append(SelectOption(label=label, value=str(emp['discord_id'])))
 
-      await dm.send("Who would you like to promote?", components = [
+      ops.append(SelectOption(label='Cancel', value='end'))
+
+      await dm.send("Who would you like to promote?", components=[
         Select(
-          placeholder = "Select a new manager",
-          options = ops,
-          custom_id= 'promote'
+          placeholder="Select a new manager",
+          options=ops,
+          custom_id='promote'
           )
       ])
 
@@ -123,14 +123,14 @@ class register(commands.Cog):
       await self.clear_last_msg(dm)
 
       if promote == "end":
-        await dm.send("Promotion canceled.") 
+        await dm.send("Promotion canceled.")
 
       else:
         self.db.promote_manager(promote, guild_id)
         await dm.send("Promotion complete!")
-        slice = records.find_one({'discord_id' : promote})
+        slice = records.find_one({'discord_id': promote})
         member_id = slice['member_id']
-        user =  get(ctx.guild.members, id=member_id)
+        user = get(ctx.guild.members, id=member_id)
         manager_check = False
 
         for role in ctx.guild.roles:
@@ -151,9 +151,9 @@ class register(commands.Cog):
           if not channel_check:
             default = ctx.guild.default_role
 
-            overwrites = {
-            default: PermissionOverwrite(read_messages=False),
-            manager_role: PermissionOverwrite(read_messages=True)
+            overwrites={
+              default: PermissionOverwrite(read_messages=False),
+              manager_role: PermissionOverwrite(read_messages=True)
             }
             channel = await ctx.guild.create_text_channel(name='timeclock-manager-log', overwrites=overwrites)
 
@@ -172,18 +172,18 @@ class register(commands.Cog):
       records = self.db.get_employee_records(guild_id)
       ops = []
 
-      for emp in records.find({'manager' : True}):
+      for emp in records.find({'manager': True}):
         if emp['discord_id'] == discord_id:
           continue
         label = str(emp['name_first'] + " " + str(emp['name_last']))
-        ops.append(SelectOption(label=label,value=str(emp['discord_id'])))
+        ops.append(SelectOption(label=label, value=str(emp['discord_id'])))
 
-      ops.append(SelectOption(label='Cancel',value='end'))
-      await dm.send("Who would you like to demote?", components = [
+      ops.append(SelectOption(label='Cancel', value='end'))
+      await dm.send("Who would you like to demote?",components =[
       Select(
-          placeholder = "Select a manager for demotion",
-          options = ops,
-          custom_id= 'demote'
+          placeholder="Select a manager for demotion",
+          options=ops,
+          custom_id='demote'
           )
       ])
 
@@ -191,12 +191,12 @@ class register(commands.Cog):
       demote = str(demote_interaction.values[0])
       await self.clear_last_msg(dm)
       if demote == "end":
-       await dm.send("Demotion canceled.") 
+        await dm.send("Demotion canceled.") 
 
       else:
         self.db.demote_manager(demote, guild_id)
         manager_role = get(ctx.guild.roles, name="Manager")
-        slice = records.find_one({'discord_id' : demote})
+        slice = records.find_one({'discord_id': demote})
         member_id = slice['member_id']
         user =  get(ctx.guild.members, id=member_id)
         await user.remove_roles(manager_role, atomic=True)
@@ -227,7 +227,7 @@ class register(commands.Cog):
     # helper function that checks if a message is in the authors dm channel
     def check(msg):
       return msg.author == ctx.author and msg.channel == dm
-    old = records.find_one({'discord_id' : discord_id})
+    old = records.find_one({'discord_id': discord_id})
     old_first = old['name_first']
     old_last = old['name_last']
 
@@ -277,7 +277,7 @@ class register(commands.Cog):
     await self.clear_last_msg(dm)
 
     # store employee in the database
-    records.update_one({'discord_id' : discord_id} , {"$set":{'member_id' : ctx.author.id, 'name_first' : first_name, 'name_last' : last_name, 'timezone' : timezone}})
+    records.update_one({'discord_id': discord_id} , {"$set": {'member_id': ctx.author.id, 'name_first': first_name, 'name_last': last_name, 'timezone': timezone}})
 
     # post verfication in discord channel
     await dm.send("You have updated your information.")
@@ -308,7 +308,7 @@ class register(commands.Cog):
       channel = await ctx.guild.create_text_channel(name='timeclock-manager-log', overwrites=overwrites)
 
   async def clear_last_msg(self, channel):
-    async for x in channel.history(limit = 1):
+    async for x in channel.history(limit=1):
       await x.delete()
 
 
