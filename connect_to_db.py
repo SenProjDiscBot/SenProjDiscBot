@@ -40,7 +40,7 @@ class connect_to_db():
             records = self.client.get_database(str(guild_id)).employee_records
             records.insert_one(new_employee)
 
-    def check_timestamp_collision(self, utc_timestamp, in_time, out_time, discord_id, guild_id):
+    def check_timestamp_collision_change(self, utc_timestamp, in_time, out_time, discord_id, guild_id):
         records = self.get_complete_shifts(guild_id)
         user_records = records.find({'discord_id': discord_id})
         utc_timestamp = utc_timestamp.replace(tzinfo=None)
@@ -50,6 +50,23 @@ class connect_to_db():
             if record['in_time'].strftime('%m:%d:%Y-%H:%M:%S:%f') == in_time.strftime('%m:%d:%Y-%H:%M:%S:%f') and \
                     record['out_time'].strftime('%m:%d:%Y-%H:%M:%S:%f') == out_time.strftime('%m:%d:%Y-%H:%M:%S:%f'):
                 continue
+            if utc_timestamp >= record['in_time'] and utc_timestamp <= record['out_time']:
+                return True
+
+        ins = self.get_active_shifts(guild_id)
+        user_ins = ins.find({'discord_id': discord_id})
+        for record in user_ins:
+            if utc_timestamp >= record['in_time']:
+                return True
+
+        return False
+
+    
+    def check_timestamp_collision(self, utc_timestamp, discord_id, guild_id):
+        records = self.get_complete_shifts(guild_id)
+        user_records = records.find({'discord_id': discord_id})
+        utc_timestamp = utc_timestamp.replace(tzinfo=None)
+        for record in user_records:
             if utc_timestamp >= record['in_time'] and utc_timestamp <= record['out_time']:
                 return True
 
