@@ -48,7 +48,7 @@ async def reload(ctx, filename):
     await ctx.send(f"Reloaded {filename}")
 
 # looks for cogs file in directory
-for cogfile in os.listdir("./src/bot/cogs"):
+for cogfile in os.listdir("./cogs"):
     if cogfile.endswith(".py"):
         if cogfile.startswith("__init__"):
             pass
