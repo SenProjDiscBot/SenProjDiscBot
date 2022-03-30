@@ -297,8 +297,7 @@ class register(commands.Cog):
                     'name_first': first_name,
                     'name_last': last_name,
                     'timezone': timezone
-                }
-            }
+                }}
         )
         # post verfication in discord channel
         await dm.send("You have updated your information.")
