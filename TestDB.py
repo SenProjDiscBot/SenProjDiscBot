@@ -3,7 +3,6 @@ import unittest
 import pytz
 from connect_to_db import connect_to_db
 
-
 class TestDB(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestDB, self).__init__(*args, **kwargs)
