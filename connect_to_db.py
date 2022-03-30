@@ -48,8 +48,8 @@ class connect_to_db():
             print(record['in_time'].strftime('%m:%d:%Y-%H:%M:%S:%f') + " " + in_time.strftime('%m:%d:%Y-%H:%M:%S:%f'))
             print(record['out_time'].strftime('%m:%d:%Y-%H:%M:%S:%f') + " " + out_time.strftime('%m:%d:%Y-%H:%M:%S:%f'))
             if record['in_time'].strftime('%m:%d:%Y-%H:%M:%S:%f') == in_time.strftime('%m:%d:%Y-%H:%M:%S:%f') and \
-                record['out_time'].strftime('%m:%d:%Y-%H:%M:%S:%f') == out_time.strftime('%m:%d:%Y-%H:%M:%S:%f'):
-                    continue
+                    record['out_time'].strftime('%m:%d:%Y-%H:%M:%S:%f') == out_time.strftime('%m:%d:%Y-%H:%M:%S:%f'):
+                continue
             if utc_timestamp >= record['in_time'] and utc_timestamp <= record['out_time']:
                 return True
 
