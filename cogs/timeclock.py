@@ -1,22 +1,17 @@
 from datetime import datetime, timedelta
-from datetime import time
-from msilib.schema import Component
-from time import strftime, strptime
 from discord import PermissionOverwrite, File, Embed
-from discord_components import DiscordComponents, ComponentsBot, Button, SelectOption, Select
+from discord_components import DiscordComponents, Button, SelectOption, Select
 from discord.ext import commands
-import pymongo
 from connect_to_db import connect_to_db
 import pytz
 import asyncio
-from discord.utils import get
 import csv
 from dateutil.relativedelta import relativedelta
 import os
 
 class timeclock(commands.Cog):
 
-  def __init__(self,client):
+  def __init__(self, client):
     self.client = client
     DiscordComponents(client)
     # connect to mongo db
@@ -24,64 +19,57 @@ class timeclock(commands.Cog):
     self.db = connect_to_db()
     print("Timeclock connected to database!")
 
-
-
   async def guild_null(self, ctx):
     if ctx.guild == None:
       await ctx.send("This command does not work in direct messages!")
       return True
     return False
 
-
   @commands.command(name='in')
   async def clock_in(self, ctx):
-    #check if command is not in direct messages
+    # check if command is not in direct messages
     if await self.guild_null(ctx):
       return
 
-    #get user discord id
+    # get user discord id
     discord_id = str(ctx.author)
     guild_id = str(ctx.guild.id)
-    #open direct message channel with author
+    # open direct message channel with author
     dm = await ctx.author.create_dm()
 
-    #check if discord user is in the database
+    # check if discord user is in the database
     if not self.db.check_active(discord_id, guild_id):
       await dm.send("You are not registered with this discord server.")
       await dm.send("Please use the 'register' command to sign up before clocking in")
       return
 
-    #check if user is already clocked in
+    # check if user is already clocked in
     if self.db.check_in(discord_id, guild_id):
       await dm.send("You are already clocked in!")
       return
 
     # verify user has set their timezone
     users = self.db.get_employee_records(guild_id)
-    userdata = list(users.find({'discord_id' : discord_id, "timezone" : {"$exists":False}}))
+    userdata = list(users.find({'discord_id': discord_id, "timezone": {"$exists": False}}))
     if len(userdata) > 0:
       await dm.send("Please use the 'edit' command to update your timezone before clocking in.")
       return
 
-
-  
-    userdata = users.find_one({'discord_id':discord_id})
+    userdata = users.find_one({'discord_id': discord_id})
     timezone = userdata['timezone']
     timezone_pytz = pytz.timezone(timezone)
     in_time = datetime.now(tz = pytz.timezone('UTC'))
 
     if self.db.clock_user_in(discord_id, guild_id):
-
-      #post verfication in discord channel
+      # post verfication in discord channel
       embed = Embed(title="You have clocked in.")
-      embed.add_field(name="In time:",value=str(in_time.astimezone(timezone_pytz).strftime('%I:%M:%S %p')))
+      embed.add_field(name="In time:", value=str(in_time.astimezone(timezone_pytz).strftime('%I:%M:%S %p')))
       await dm.send(embed=embed)
       embed = Embed(title=userdata["name_first"] + " " + userdata["name_last"] + " has clocked in.")
       embed.add_field(name="In time:",value=str(in_time.astimezone(timezone_pytz).strftime('%I:%M:%S %p')))
       await self.post_mng_log_embed(ctx, embed)
-      #start 10 hour timer
+      # start 10 hour timer
       await self.ten_hour_check(ctx)
-
     else:
       await dm.send("There has been an error in your clock in.")  
 
@@ -90,55 +78,51 @@ class timeclock(commands.Cog):
     # check if command is not in direct messages
     if await self.guild_null(ctx):
       return
-    #get user discord id
+    # get user discord id
     discord_id = str(ctx.author)
     guild_id = str(ctx.guild.id)
-    #create direct message channel with author
+    # create direct message channel with author
     dm = await ctx.author.create_dm()
 
-    #check if discord user is clocked in
+    # check if discord user is clocked in
     if not self.db.check_in(discord_id, guild_id):
       await dm.send("You are not clocked in.")
       return
 
     # verify user has set their timezone
     users = self.db.get_employee_records(guild_id)
-    userdata = list(users.find({'timezone' : {'$exists':False}, 'discord_id' : discord_id }))
-  
+    userdata = list(users.find({'timezone': {'$exists': False}, 'discord_id': discord_id }))
+
     if len(userdata) > 0:
       await dm.send("Please use the 'edit' command to update your timezone before clocking out.")
       return
 
     records = self.db.get_active_shifts(guild_id)
-    shift_data = records.find_one({'discord_id' : discord_id})
-    
-    userdata = users.find_one({'discord_id':discord_id})
+    shift_data = records.find_one({'discord_id': discord_id})
+
+    userdata = users.find_one({'discord_id': discord_id})
     timezone = userdata['timezone']
     timezone_pytz = pytz.timezone(timezone)
     in_time_data = shift_data["in_time"]
     out_time = datetime.now().astimezone(pytz.timezone('UTC'))
-
     tz = pytz.timezone("UTC")
     in_time = tz.localize(in_time_data)
-
     total = out_time - in_time
-    
+
     if self.db.clock_user_out(discord_id, guild_id):
       embed = Embed(title="You have been clocked out.")
-      embed.add_field(name="In time:",value=str(in_time.astimezone(timezone_pytz).strftime('%I:%M:%S %p')))
-      embed.add_field(name="Out time:",value=str(out_time.astimezone(timezone_pytz).strftime('%I:%M:%S %p')))
-      embed.add_field(name="Time Worked:",value=str(str(total).split(".")[0]))
+      embed.add_field(name="In time:", value=str(in_time.astimezone(timezone_pytz).strftime('%I:%M:%S %p')))
+      embed.add_field(name="Out time:", value=str(out_time.astimezone(timezone_pytz).strftime('%I:%M:%S %p')))
+      embed.add_field(name="Time Worked:", value=str(str(total).split(".")[0]))
       await dm.send(embed=embed)
       embed = Embed(title=userdata["name_first"] + " " + userdata["name_last"] + " has clocked out.")
-      embed.add_field(name="In time:",value=str(in_time.astimezone(timezone_pytz).strftime('%I:%M:%S %p')))
-      embed.add_field(name="Out time:",value=str(out_time.astimezone(timezone_pytz).strftime('%I:%M:%S %p')))
-      embed.add_field(name="Time Worked:",value=str(str(total).split(".")[0]))
+      embed.add_field(name="In time:", value=str(in_time.astimezone(timezone_pytz).strftime('%I:%M:%S %p')))
+      embed.add_field(name="Out time:", value=str(out_time.astimezone(timezone_pytz).strftime('%I:%M:%S %p')))
+      embed.add_field(name="Time Worked:", value=str(str(total).split(".")[0]))
       await self.post_mng_log_embed(ctx, embed)
-
 
     else:
       await dm.send("There has been an error in your clock out.")  
-    
 
   @commands.command(name='fix')
   async def fix(self, ctx):
@@ -146,7 +130,7 @@ class timeclock(commands.Cog):
     if await self.guild_null(ctx):
       return
     # helper function that checks if a message is in the authors dm channel
- 
+
     # get user discord id
     discord_id = str(ctx.author)
     guild_id = str(ctx.guild.id)
@@ -166,7 +150,7 @@ class timeclock(commands.Cog):
       for employee in records.find():
         name = employee['name_first'] + " " + employee['name_last']
         ops.append(SelectOption(label=name, value=employee['discord_id']))
-        
+
       await dm.send("Who would you like to edit?", components = [
         Select(
           placeholder = 'Select a user',
@@ -174,12 +158,11 @@ class timeclock(commands.Cog):
           custom_id = 'user'
         )
       ])
-      
+
       user_choice = await self.client.wait_for("select_option", check=lambda i: i.custom_id == "user" and i.user == ctx.author)
       discord_id = user_choice.values[0]  
       await self.clear_last_msg(dm)
 
-    
     # check if discord user has completed shifts to edit
     if not self.db.check_complete(discord_id, guild_id):
       await dm.send("You do not have any completed shifts to edit.")
@@ -203,7 +186,6 @@ class timeclock(commands.Cog):
       utcout = tz.localize(outtime)
       instr = utcin.astimezone(tzp).strftime("%I:%M %p")
       outstr = utcout.astimezone(tzp).strftime("%I:%M %p on %A %B %d")
-
       shift_data.append(SelectOption(label=instr + ' to ' + outstr, value= str(shift["in_time"].timestamp())))
 
     recent_14 = shift_data[-14:]
@@ -225,7 +207,7 @@ class timeclock(commands.Cog):
     tz = pytz.timezone("UTC")
     in_time = tz.localize(in_time_raw)
     out_time = tz.localize(out_time_raw)
-    
+
     # clear spent Select
     await self.clear_last_msg(dm)
 
@@ -253,7 +235,7 @@ class timeclock(commands.Cog):
     else:
       dt_change = out_time
       await dm.send("You are editing your out time (" + str(out_time.astimezone(tzp).strftime('%I:%M:%S %p on %A %B %d')) + ")")
-    
+
     # begin while loop that allows for user verification and re-trial before final submittion      
     try_again = True
     while try_again:
@@ -274,7 +256,7 @@ class timeclock(commands.Cog):
           if not in_time.astimezone(tzp).strftime('%d') == val.astimezone(tzp).strftime('%d'):
             in_val = in_val + " (next day)"
           ops.append(SelectOption(label= in_val, value = str(x)))
-       
+
       # build and send hours Select
       await dm.send("", components = [
         Select(
@@ -290,10 +272,10 @@ class timeclock(commands.Cog):
         hourstr = (out_time.astimezone(tzp) - timedelta(hours = hoursint)).strftime('%I')
       else:
         hourstr = (in_time.astimezone(tzp) + timedelta(hours = hoursint)).strftime('%I')
-      
+
       # clear spend Select
       await self.clear_last_msg(dm)
-      
+
       # Build and send minutes Select with hours from previous answer displayed for clarity
       await dm.send("", components = [
         Select(
@@ -305,7 +287,7 @@ class timeclock(commands.Cog):
           custom_id= 'minutes'
           )
       ])
-      
+
       minutes_interaction = await self.client.wait_for("select_option", check=lambda i: i.custom_id == "minutes" and i.user == ctx.author)
       # create new datetime value with users responses
       hours = int(hours_interaction.values[0])
@@ -317,10 +299,8 @@ class timeclock(commands.Cog):
         new_dt = in_time + timedelta(hours=hours)
         new_dt = new_dt.replace(minute=minutes, second=0, microsecond=0)
 
-   
       # clear spend Select
       await self.clear_last_msg(dm)
-      
       # verify new datetime is correct
       await dm.send(new_dt.astimezone(tzp).strftime('%I:%M:%S %p'))
       await dm.send("Is this correct?", components = [
@@ -329,13 +309,11 @@ class timeclock(commands.Cog):
         Button(label="Cancel", style="2", custom_id="exit")
       ])
 
-      #await response
+      # await response
       choice = await self.client.wait_for("button_click", check = lambda i: i.custom_id == "send" or "again" or "exit")
       # clear spent Buttons
       await self.clear_last_msg(dm)
       await self.clear_last_msg(dm)
-
-      
 
       # break loop if user confirms verification 
       if choice.component.custom_id == "exit":
@@ -346,7 +324,7 @@ class timeclock(commands.Cog):
         if self.db.check_timestamp_collision(new_dt, in_time, out_time, discord_id, guild_id):
           await dm.send("This new time would collide with a previous entry in your timesheet")
           continue
-        
+
         try_again = False
 
         # select in or out
@@ -357,7 +335,7 @@ class timeclock(commands.Cog):
             # restart loop
             try_again = True
             continue
-        
+
           # if manager bypass verification
           if self.db.check_manager(str(ctx.author), guild_id):
             total = out_time.astimezone(tzp) - new_dt.astimezone(tzp)
@@ -378,7 +356,7 @@ class timeclock(commands.Cog):
               Button(label="Yes", style="3", custom_id="yes"),
               Button(label="No", style="4", custom_id="no")
             ])
-            #await response
+            # await response
             await dm.send("Please wait while we aprove this with your boss.")
             boss_choice = await self.client.wait_for("button_click", check = lambda i: i.custom_id == "yes" or "no")
             # clear spent Buttons
@@ -392,13 +370,13 @@ class timeclock(commands.Cog):
               await boss_dm.send("Thank you, I will let " + name + " know their shift has not been changed and to contact you if they have any questions as to why.")
               await dm.send("Your boss has declined your timeclock change. Please contact them if you have any concerns as to why.")
               return
-    
+
             # update record with new in_time datetime and total seconds of the shift
             total = out_time.astimezone(tzp) - new_dt.astimezone(tzp)
             seconds = total.seconds
             new_val = { "$set": { 'in_time': new_dt, 'seconds_worked': seconds}}
             records.update_one({'discord_id': discord_id, 'out_time': out_time}, new_val)
-            #post verfication in dm
+            # post verfication in dm
             await dm.send("Your boss has confirmed your timeclock change on " + str(new_dt.strftime('%A %B %d')))
             await dm.send("Old shift: " + str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p') + " to " + out_time.astimezone(tzp).strftime('%I:%M:%S %p')))
             await dm.send("New shift: " + str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p') + " to " + out_time.astimezone(tzp).strftime('%I:%M:%S %p')))
@@ -429,7 +407,7 @@ class timeclock(commands.Cog):
               Button(label="Yes", style="3", custom_id="yes"),
               Button(label="No", style="4", custom_id="no")
             ])
-            #await response
+            # await response
             await dm.send("Please wait while we aprove this with your boss.")
             boss_choice = await self.client.wait_for("button_click", check = lambda i: i.custom_id == "yes" or "no")
             # clear spent Buttons
@@ -440,13 +418,13 @@ class timeclock(commands.Cog):
               await boss_dm.send("Thank you, I will let " + name + " know their shift has not been changed and to contact you if they have any questions as to why.")
               await dm.send("Your boss has declined your timeclock change. Please contact them if you have any concerns as to why.")
               return
-            
+
             # update record with new out_time datetime and total seconds of the shift
             total = new_dt - in_time
             seconds = total.seconds
             new_val = {"$set": {'out_time': new_dt, 'seconds_worked': seconds}}
             records.update_one({'discord_id': discord_id, 'in_time': in_time}, new_val)
-            #post verfication in dm
+            # post verfication in dm
             await dm.send("You have edited your out time on " + str(new_dt.astimezone(tzp).strftime('%A %B %d')))
             await dm.send("Old shift: " + in_time.astimezone(tzp).strftime('%I:%M:%S %p') + " to " + str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p')))
             await dm.send("New shift: " + in_time.astimezone(tzp).strftime('%I:%M:%S %p') + " to " + str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p')))
@@ -454,8 +432,6 @@ class timeclock(commands.Cog):
             await self.post_mng_log(ctx, "Old shift: " + in_time.astimezone(tzp).strftime('%I:%M:%S %p') + " to " + str(dt_change.astimezone(tzp).strftime('%I:%M:%S %p')))
             await self.post_mng_log(ctx, "New shift: " + in_time.astimezone(tzp).strftime('%I:%M:%S %p') + " to " + str(new_dt.astimezone(tzp).strftime('%I:%M:%S %p')))
 
-    
-    
   @commands.command(name = 'time')
   async def printtime(self, ctx):
     #allows user to see all of their time data. well eventually be depricated to data command
@@ -471,7 +447,7 @@ class timeclock(commands.Cog):
     # get timezone
     discord_id = str(ctx.author)
     users = self.db.get_employee_records(guild_id)
-    userdata = users.find_one({'discord_id':discord_id})
+    userdata = users.find_one({'discord_id': discord_id})
     timezone = userdata['timezone']
     tzp = pytz.timezone(timezone)
     utc = pytz.timezone('UTC')
@@ -499,14 +475,13 @@ class timeclock(commands.Cog):
     # send shift information in dm  
     for shift in shift_data:
       await dm.send(shift)
-    
+
     # calculate and send total time based on running total of seconds.
     hours, remainder = divmod(total, 3600)
     minutes, seconds = divmod(remainder, 60)
     total_time =  '{:02}:{:02}:{:02}'.format(int(hours), int(minutes), int(seconds))
     await dm.send("Total time: " + total_time)
 
-  
   @commands.command(name = 'clean')
   async def clean(self, ctx):
   # development command that has the bot delete its messages in ctx authors dm's
@@ -520,24 +495,22 @@ class timeclock(commands.Cog):
   # command that sends a manager a CSV file of all timeclock data between two chosen dates
     guild_id = ctx.guild.id
     user_id = str(ctx.author)
-    #manager only command
+
+    # manager only command
     if not self.db.check_manager(user_id, guild_id):
       return
-
     dm = await ctx.author.create_dm()
- 
     option_start = self.db.get_oldest_shift(guild_id)
     option_in = option_start["in_time"].replace(day = 1, hour = 0, minute = 0, second = 0, microsecond = 0)
     option_end = datetime.now().replace()
-    
-    #get starting month
+
+    # get starting month
     ops = []
     while option_in < option_end:
       lbl = option_in.strftime("%B, %Y")
       val = option_in.strftime("%m %Y")
       ops.append(SelectOption(label=lbl, value=val))
       option_in = option_in + relativedelta(months=+1)
-    
     await dm.send("Select a starting month", components = [
         Select(
           placeholder = "Month",
@@ -552,7 +525,8 @@ class timeclock(commands.Cog):
     start_month = start_split[0]
     start_year = start_split[1]
     start = datetime(year = int(start_year), month = int(start_month), day = 1, hour = 0, minute = 0, second = 0, microsecond= 0)
-    #get starting day
+
+    # get starting day
     ops = []
 
     while int(start.strftime("%d")) < 20:
@@ -597,7 +571,7 @@ class timeclock(commands.Cog):
       val = start.strftime("%m %Y")
       ops.append(SelectOption(label=lbl, value=val))
       start = start + relativedelta(months=1)
-    
+
     await dm.send("Select an ending month", components = [
         Select(
           placeholder = "Month",
@@ -615,6 +589,7 @@ class timeclock(commands.Cog):
     start = datetime(year=int(end_year), month=int(end_month), day=1, hour=0, minute=0, second=0, microsecond=0)
     if end_month == start_month:
       start = start.replace(day=int(day))
+
     # get ending day
     ops = []
     while len(ops) < 20 and start.strftime("%m") == end_month:
@@ -685,7 +660,6 @@ class timeclock(commands.Cog):
     await dm.send(file=File(title))
     os.remove(title)
 
-
   async def clear_last_msg(self, channel):
   # clears the last message the bot sent in channel
     async for x in channel.history(limit = 1):
@@ -702,12 +676,13 @@ class timeclock(commands.Cog):
 
       if not self.db.check_in(discord_id, guild_id):
         return
-    
+
       dm = await ctx.author.create_dm()
       await dm.send("You have been clocked in for 10 hours. Is this intentional?", components = [
           Button(label="No", style="4", custom_id="out"),
           Button(label="Yes", style="3", custom_id="remain")
         ])
+
       # await response
       try:
         ans = await self.client.wait_for("button_click", timeout=300, check = lambda i: i.custom_id == "out" or "remain" )
@@ -720,10 +695,9 @@ class timeclock(commands.Cog):
       except asyncio.TimeoutError:
         await self.clear_last_msg(dm)
         break
-    
+
     self.db.clock_user_out(discord_id,guild_id)
     await dm.send("You were clocked out due to the bot suspecting you forgot to clock out. Please edit this shift to correct your time sheet.")
-
 
   async def get_mng_log(self, ctx):
   # get channel object for manager log
@@ -736,12 +710,11 @@ class timeclock(commands.Cog):
   # post to the manager log
     mng_log = await self.get_mng_log(ctx)
     await mng_log.send(msg)
-  
+
   async def post_mng_log_embed(self, ctx, embed):
   # post an embed to the manager log
     mng_log = await self.get_mng_log(ctx)
     await mng_log.send(embed = embed)
-
 
   async def create_mng_log(self, ctx):
   # attempt to create manager log
@@ -762,13 +735,13 @@ class timeclock(commands.Cog):
 
     if not channel_check:
       default = ctx.guild.default_role
-      
 
       overwrites = {
       default: PermissionOverwrite(read_messages=False),
       manager_role: PermissionOverwrite(read_messages=True)
       }
       channel = await ctx.guild.create_text_channel(name='timeclock-manager-log', overwrites=overwrites)
+
 
 def setup(client):
   client.add_cog(timeclock(client))
