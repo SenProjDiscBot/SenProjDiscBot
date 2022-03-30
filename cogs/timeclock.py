@@ -374,7 +374,7 @@ class timeclock(commands.Cog):
                         await boss_dm.send(name + " would like to change a shift on " + new_dt.strftime('%A %B %d'))
                         await boss_dm.send(
                           "Old shift: " +
-                          str( 
+                          str(
                               dt_change.astimezone(tzp).strftime('%I:%M:%S %p')
                               + " to " +
                               out_time.astimezone(tzp).strftime('%I:%M:%S %p')
@@ -412,7 +412,7 @@ class timeclock(commands.Cog):
                                     dt_change.astimezone(tzp).strftime('%I:%M:%S %p') +
                                     " to " +
                                     out_time.astimezone(tzp).strftime('%I:%M:%S %p'))
-        )
+                                )
                             await self.post_mng_log(
                                 ctx,
                                 "New shift: " +
