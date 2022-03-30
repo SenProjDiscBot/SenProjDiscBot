@@ -22,7 +22,7 @@ class reminder(commands.Cog):
             return msg.author == ctx.author and msg.channel == dm
 
         await dm.send("When would you like your reminder(in minutes?) ")
-        rt = await self.client.wait_for("message", check=check)    
+        rt = await self.client.wait_for("message", check=check)
         while True:
             try:
                 is_int = int(rt.content)
@@ -36,7 +36,7 @@ class reminder(commands.Cog):
         rc = await self.client.wait_for("message", check=check)
         reminder_content = rc.content
         await dm.send("you will be reminded to " + reminder_content + " in " + reminder_time + " minutes! ")
-        convertedTime = (int(reminder_time) * 60)#might need to convert to float
+        convertedTime = (int(reminder_time) * 60)  # might need to convert to float
         await asyncio.sleep(convertedTime)
         await dm.send("EZ-Bot was set to remind you to: ")
         await dm.send(reminder_content)
