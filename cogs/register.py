@@ -1,23 +1,18 @@
-from datetime import datetime
-from datetime import time
-from discord import DMChannel, PermissionOverwrite
+from discord import  PermissionOverwrite
 from discord.ext import commands
 from discord_components import DiscordComponents, ComponentsBot, Button, SelectOption, Select
-import pymongo
 from connect_to_db import connect_to_db
 from discord.utils import get
 
-class register(commands.Cog):
 
-  def __init__(self,client):
+class register(commands.Cog):
+  def __init__(self, client):
     self.client = client
     DiscordComponents(client)
     # connect to mongo db
     print("Register connecting to mongoDB....")
     self.db = connect_to_db()
     print("Register connected to database!")
-
-
 
   async def guild_null(self, ctx):
     if ctx.guild == None:
@@ -30,35 +25,33 @@ class register(commands.Cog):
     # check if command is not in direct messages
     if await self.guild_null(ctx):
       return
-    #get user discord id
+    # get user discord id
     discord_id = str(ctx.author)
     guild_id = str(ctx.guild.id)
-    #connect to mongoDB
-    records = self.db.get_employee_records(guild_id)
 
-    #check if discord user is already in the database
+    # check if discord user is already in the database
     if self.db.check_active(discord_id, guild_id):
       await ctx.send("You are already in this database.")
       return
 
-    #open a dm channel with user
+    # open a dm channel with user
     dm = await ctx.author.create_dm()
 
-    #helper function that checks if a message is in the authors dm channel
+    # helper function that checks if a message is in the authors dm channel
     def check(msg):
       return msg.author == ctx.author and msg.channel == dm
 
-    #get first name
+    # get first name
     await dm.send("First Name?")
     fn = await self.client.wait_for("message", check=check)
     first_name = fn.content
 
-    #get last name
+    # get last name
     await dm.send("Last Name?")
     ln = await self.client.wait_for("message", check=check)
     last_name = ln.content
 
-    #get timezone
+    # get timezone
     await dm.send("What is your timezone?", components = [
         Select(
           placeholder = "Timezone",
@@ -94,16 +87,15 @@ class register(commands.Cog):
     await self.clear_last_msg(dm)
     member_id = ctx.author.id
     self.db.add_user(discord_id, first_name, last_name, timezone, guild_id, member_id)
-    
-    #post verfication in discord channel
-    await ctx.send(first_name + " " + last_name + " created in the database.")
 
+    # post verfication in discord channel
+    await ctx.send(first_name + " " + last_name + " created in the database.")
 
   @commands.command(name='promote')
   async def promote(self, ctx):
     if await self.guild_null(ctx):
       return
-    #get user discord id
+    # get user discord id
     discord_id = str(ctx.author)
     guild_id = str(ctx.guild.id)
     dm = await ctx.author.create_dm()
@@ -114,11 +106,11 @@ class register(commands.Cog):
       for emp in records.find({'manager' : False}):
         label = str(emp['name_first'] + " " + str(emp['name_last']))
         ops.append(SelectOption(label=label,value=str(emp['discord_id'])))
-      
+ 
       ops.append(SelectOption(label='Cancel',value='end'))
-      
+
       await dm.send("Who would you like to promote?", components = [
-      Select(
+        Select(
           placeholder = "Select a new manager",
           options = ops,
           custom_id= 'promote'
@@ -131,7 +123,7 @@ class register(commands.Cog):
       await self.clear_last_msg(dm)
 
       if promote == "end":
-       await dm.send("Promotion canceled.") 
+        await dm.send("Promotion canceled.") 
 
       else:
         self.db.promote_manager(promote, guild_id)
@@ -149,11 +141,8 @@ class register(commands.Cog):
         if not manager_check:
           manager_role = await ctx.guild.create_role(name="Manager")
 
-        
-
         if user:
           await user.add_roles(manager_role, atomic=True)
-
           channel_check = False
           for channel in await ctx.guild.fetch_channels():
             if channel.name == "timeclock-manager-log":
@@ -161,7 +150,7 @@ class register(commands.Cog):
 
           if not channel_check:
             default = ctx.guild.default_role
-            
+
             overwrites = {
             default: PermissionOverwrite(read_messages=False),
             manager_role: PermissionOverwrite(read_messages=True)
@@ -170,13 +159,12 @@ class register(commands.Cog):
 
     else:
       await dm.send("You do not have permission to access this command. (peasant)")
-    
 
   @commands.command(name='demote')
   async def demote(self, ctx):
     if await self.guild_null(ctx):
       return
-    #get user discord id
+    # get user discord id
     discord_id = str(ctx.author)
     guild_id = str(ctx.guild.id)
     dm = await ctx.author.create_dm()
@@ -189,9 +177,8 @@ class register(commands.Cog):
           continue
         label = str(emp['name_first'] + " " + str(emp['name_last']))
         ops.append(SelectOption(label=label,value=str(emp['discord_id'])))
-      
+
       ops.append(SelectOption(label='Cancel',value='end'))
-      
       await dm.send("Who would you like to demote?", components = [
       Select(
           placeholder = "Select a manager for demotion",
@@ -199,12 +186,10 @@ class register(commands.Cog):
           custom_id= 'demote'
           )
       ])
-      
+
       demote_interaction = await self.client.wait_for("select_option", check=lambda i: i.custom_id == "demote" and i.user == ctx.author)
       demote = str(demote_interaction.values[0])
-
       await self.clear_last_msg(dm)
-
       if demote == "end":
        await dm.send("Demotion canceled.") 
 
@@ -219,45 +204,44 @@ class register(commands.Cog):
 
     else:
       await dm.send("You do not have permission to access this command. (peasant)")
-        
 
   @commands.command(name='edit')
   async def edit(self, ctx):
     # check if command is not in direct messages
     if await self.guild_null(ctx):
       return
-    #get user discord id
+    # get user discord id
     discord_id = str(ctx.author)
     guild_id = str(ctx.guild.id)
-    #get mongoDB table
+    # get mongoDB table
     records = self.db.get_employee_records(guild_id)
-    #check if discord user is already in the database
+    # check if discord user is already in the database
     if not self.db.check_active(discord_id, guild_id):
       return
 
-    #open a dm channel with user
+    # open a dm channel with user
     dm = await ctx.author.create_dm()
-    ######### v ################ v REMOVE EVENTUALLY ##################### v ##########################################################################################################################################
+    # ######## v ################ v REMOVE EVENTUALLY ##################### v ##########################################################################################################################################
     self.db.update_all_manager_values(guild_id)
-    ########## ^ ################## REMOVE EVENTUALLY ####################### ^ ##################################################################################################################################################################
-    #helper function that checks if a message is in the authors dm channel
+    # ######### ^ ################## REMOVE EVENTUALLY ####################### ^ ##################################################################################################################################################################
+    # helper function that checks if a message is in the authors dm channel
     def check(msg):
       return msg.author == ctx.author and msg.channel == dm
     old = records.find_one({'discord_id' : discord_id})
     old_first = old['name_first']
     old_last = old['name_last']
 
-    #get first name
+    # get first name
     await dm.send("Current: " + old_first + "\nFirst Name?")
     fn = await self.client.wait_for("message", check=check)
     first_name = fn.content
 
-    #get last name
+    # get last name
     await dm.send("Current: " + old_last + "\nLast Name?")
     ln = await self.client.wait_for("message", check=check)
     last_name = ln.content
-    
-    #get timezone
+
+    # get timezone
     await dm.send("What is your timezone?", components = [
         Select(
           placeholder = "Timezone",
@@ -291,14 +275,12 @@ class register(commands.Cog):
     timezone_interaction = await self.client.wait_for("select_option", check=lambda i: i.custom_id == "timezone" and i.user == ctx.author)
     timezone = timezone_interaction.values[0]
     await self.clear_last_msg(dm)
-    
 
-    #store employee in the database
+    # store employee in the database
     records.update_one({'discord_id' : discord_id} , {"$set":{'member_id' : ctx.author.id, 'name_first' : first_name, 'name_last' : last_name, 'timezone' : timezone}})
 
-    #post verfication in discord channel
+    # post verfication in discord channel
     await dm.send("You have updated your information.")
-
 
   async def create_mng_log(self, ctx):
     channel_check = False
@@ -318,18 +300,17 @@ class register(commands.Cog):
 
     if not channel_check:
       default = ctx.guild.default_role
-      
 
       overwrites = {
       default: PermissionOverwrite(read_messages=False),
       manager_role: PermissionOverwrite(read_messages=True)
       }
       channel = await ctx.guild.create_text_channel(name='timeclock-manager-log', overwrites=overwrites)
-    
 
   async def clear_last_msg(self, channel):
     async for x in channel.history(limit = 1):
       await x.delete()
+
 
 def setup(client):
   client.add_cog(register(client))
