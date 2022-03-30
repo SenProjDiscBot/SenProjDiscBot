@@ -28,12 +28,8 @@ class bugreport(commands.Cog):
     def check(msg):
       return msg.author == ctx.author and msg.channel == dm
 
-    await dm.send("Please send discription of bug with screenshot as a reply")
+    await dm.send("Please post description of bug and pertinent screenshots in Bug-Report Channel")
     br = await self.client.wait_for("message", check=check)
-    bug_report = br.content
-    await dm.send("Your report of a bug will be sent to our team")
-    channel = ctx.get_channel(938266823315566592)
-    await channel.send(bug_report)
     if await self.guild_null(ctx):
       return
     
