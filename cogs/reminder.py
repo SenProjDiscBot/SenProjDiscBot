@@ -4,8 +4,6 @@ import time
 from discord.ext import commands
 from discord import DMChannel
 import asyncio
-
-
 class reminder(commands.Cog):
 
   def __init__(self,client):
@@ -17,28 +15,32 @@ class reminder(commands.Cog):
       return True
     return False
     
-      
+  
 
   @commands.command(name='reminder')
   async def reminder(self, ctx):
     dm = await ctx.author.create_dm()
     if await self.guild_null(ctx):
       return
-    
+
     def check(msg):
-      return msg.author == ctx.author and msg.channel == dm
+        return msg.author == ctx.author and msg.channel == dm
 
     await dm.send("When would you like your reminder(in minutes?) ")
-    rt = await self.client.wait_for("message", check=check)    
+    rt = await self.client.wait_for("message", check=check)
+    
+    while int(rt.content) <= 0:
+      await dm.send("please enter a positive integer for your reminders timer")
+      rt = await self.client.wait_for("message", check=check)
+
     while True:
-      try:
-          is_int = int(rt.content)
-          break
-      except:
-        await dm.send("Please set a new reminder using an integer as input for time!")
-        
-        return
-      
+          try:
+              is_int = int(rt.content)
+              break
+          except:
+            await dm.send("Please set a new reminder using an integer as input for time!")
+            await dm.send("When would you like your reminder(in minutes?) ")
+            rt = await self.client.wait_for("message", check=check)
     
     reminder_time = rt.content
     await dm.send("what would you like to be reminded of?")
