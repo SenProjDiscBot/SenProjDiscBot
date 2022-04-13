@@ -39,20 +39,23 @@ class timeclock(commands.Cog):
 
         # check if discord user is in the database
         if not self.db.check_active(discord_id, guild_id):
-            await dm.send("You are not registered with this discord server.")
-            await dm.send("Please use the 'register' command to sign up before clocking in")
+            embed = Embed(title=" ", color=0x000FF)
+            embed.add_field(name="You are not registered with this discord server.", value=str("Please use the 'register' command to sign up before clocking in"))
+            await dm.send(embed=embed)
             return
 
         # check if user is already clocked in
         if self.db.check_in(discord_id, guild_id):
-            await dm.send("You are already clocked in!")
+            embed = Embed(title="You are already clocked in!", color=0x000FF)
+            await dm.send(embed=embed)
             return
 
         # verify user has set their timezone
         users = self.db.get_employee_records(guild_id)
         userdata = list(users.find({'discord_id': discord_id, "timezone": {"$exists": False}}))
         if len(userdata) > 0:
-            await dm.send("Please use the 'edit' command to update your timezone before clocking in.")
+            embed = Embed(title="Please use the 'edit' command to update your timezone before clocking in.", color=0x000FF)
+            await dm.send(embed=embed)
             return
 
         userdata = users.find_one({'discord_id': discord_id})
@@ -71,7 +74,8 @@ class timeclock(commands.Cog):
             # start 10 hour timer
             await self.ten_hour_check(ctx)
         else:
-            await dm.send("There has been an error in your clock in.")
+            embed = Embed(title="There has been an error in your clock in.", color=0x000FF)
+            await dm.send(embed=embed)
 
     @commands.command(name='out')
     async def clock_out(self, ctx):
@@ -86,7 +90,8 @@ class timeclock(commands.Cog):
 
         # check if discord user is clocked in
         if not self.db.check_in(discord_id, guild_id):
-            await dm.send("You are not clocked in.")
+            embed = Embed(title="You are not clocked in.", color=0x000FF)
+            await dm.send(embed=embed)
             return
 
         # verify user has set their timezone
@@ -94,7 +99,8 @@ class timeclock(commands.Cog):
         userdata = list(users.find({'timezone': {'$exists': False}, 'discord_id': discord_id}))
 
         if len(userdata) > 0:
-            await dm.send("Please use the 'edit' command to update your timezone before clocking out.")
+            embed = Embed(title="Please use the 'edit' command to update your timezone before clocking out.", color=0x000FF)
+            await dm.send(embed=embed)
             return
 
         records = self.db.get_active_shifts(guild_id)
@@ -122,7 +128,8 @@ class timeclock(commands.Cog):
             await self.post_mng_log_embed(ctx, embed)
 
         else:
-            await dm.send("There has been an error in your clock out.")
+            embed = Embed(title="There has been an error in your clock out.", color=0x000FF)
+            await dm.send(embed=embed)
 
     @commands.command(name='fix')
     async def fix(self, ctx):
@@ -141,7 +148,8 @@ class timeclock(commands.Cog):
         users = self.db.get_employee_records(guild_id)
         userdata = list(users.find({'timezone': {'$exists': False}, 'discord_id': discord_id}))
         if len(userdata) > 0:
-            await dm.send("Please use the 'edit' command to update your timezone before clocking out.")
+            embed = Embed(title="Please use the 'edit' command to update your timezone first.", color=0x000FF)
+            await dm.send(embed=embed)
             return
 
         if self.db.check_manager(discord_id, guild_id):
@@ -150,8 +158,8 @@ class timeclock(commands.Cog):
             for employee in records.find():
                 name = employee['name_first'] + " " + employee['name_last']
                 ops.append(SelectOption(label=name, value=employee['discord_id']))
-
-            await dm.send("Who would you like to edit?", components=[
+            embed = Embed(title="Who would you like to edit?", color=0x000FF)
+            await dm.send("", embed=embed, components=[
                 Select(
                     placeholder='Select a user',
                     options=ops,
@@ -163,10 +171,12 @@ class timeclock(commands.Cog):
                 "select_option", check=lambda i: i.custom_id == "user" and i.user == ctx.author)
             discord_id = user_choice.values[0]
             await self.clear_last_msg(dm)
+            await self.clear_last_msg(dm)
 
         # check if discord user has completed shifts to edit
-        if not self.db.check_complete(discord_id, guild_id):
-            await dm.send("You do not have any completed shifts to edit.")
+        if not self.db.check_complete(discord_id, guild_id) and not self.db.check_manager(discord_id, guild_id):
+            embed = Embed(title="You do not have any completed shifts to edit.", color=0x000FF)
+            await dm.send(embed=embed)
             return
 
         # get timezone
@@ -192,7 +202,8 @@ class timeclock(commands.Cog):
 
         recent_14 = shift_data[-14:]
         # build a Select to choose a shift for user to edit and send in dms
-        await dm.send("Which shift would you like to edit?", components=[
+        embed = Embed(title="Which shift would you like to edit?", color=0x000FF)
+        await dm.send("", embed=embed, components=[
             Select(
                 placeholder="Shifts",
                 options=recent_14,
@@ -215,7 +226,8 @@ class timeclock(commands.Cog):
         await self.clear_last_msg(dm)
 
         # build a Select to chose to edit the in time or the out time of the chosen shift
-        await dm.send("Which would you like to edit?", components=[
+        embed = Embed(title="Which would you like to edit?", color=0x000FF)
+        await dm.send("", embed=embed, components=[
             Select(
                 placeholder="In or Out",
                 options=[
@@ -241,20 +253,20 @@ class timeclock(commands.Cog):
         # display the datetime selected for editing
         if choice1.values[0] == "in":
             dt_change = in_time
-            await dm.send(
-                "You are editing your in time (" +
-                str(in_time.astimezone(tzp).strftime('%I:%M:%S %p on %A %B %d')) + ")")
+            embed = Embed(title="You are editing the in time (" +
+                str(in_time.astimezone(tzp).strftime('%I:%M:%S %p on %A %B %d')) + ")", color=0x000FF)
+            await dm.send(embed=embed)
         else:
             dt_change = out_time
-            await dm.send(
-                "You are editing your out time (" +
-                str(out_time.astimezone(tzp).strftime('%I:%M:%S %p on %A %B %d')) + ")")
+            embed = Embed(title="You are editing the out time (" +
+                str(out_time.astimezone(tzp).strftime('%I:%M:%S %p on %A %B %d')) + ")", color=0x000FF)
+            await dm.send(embed=embed)
 
         # begin while loop that allows for user verification and re-trial before final submittion
         try_again = True
         while try_again:
-            # build SelectOptions for 24 hour values 12 AM, 1 - 11 AM, 12 PM,
-            # 1 - 11 PM in order restricted based on corresponding in/out time
+            # build SelectOptions for 24 hours of values starting from the in or out associated with the 
+            # selected entry 
             ops = []
 
             if choice1.values[0] == "in":
@@ -273,7 +285,8 @@ class timeclock(commands.Cog):
                     ops.append(SelectOption(label=in_val, value=str(x)))
 
             # build and send hours Select
-            await dm.send("", components=[
+            embed = Embed(title="Select an hour for this time entry.", color=0x000FF)
+            await dm.send("", embed=embed, components=[
                 Select(
                     placeholder="Hours",
                     options=ops,
@@ -293,7 +306,8 @@ class timeclock(commands.Cog):
             await self.clear_last_msg(dm)
 
             # Build and send minutes Select with hours from previous answer displayed for clarity
-            await dm.send("", components=[
+            embed = Embed(title="Select a minute value for this time entry.", color=0x000FF)
+            await dm.send("", embed=embed, components=[
                 Select(
                     placeholder="Minutes",
                     options=[
@@ -321,8 +335,9 @@ class timeclock(commands.Cog):
             # clear spend Select
             await self.clear_last_msg(dm)
             # verify new datetime is correct
-            await dm.send(new_dt.astimezone(tzp).strftime('%I:%M:%S %p'))
-            await dm.send("Is this correct?", components=[
+            title = new_dt.astimezone(tzp).strftime('%I:%M:%S %p') + "\nIs this correct?"
+            embed = Embed(title=title, color=0x000FF)
+            await dm.send("", embed=embed, components=[
                 Button(label="Yes", style="3", custom_id="send"),
                 Button(label="No", style="4", custom_id="again"),
                 Button(label="Cancel", style="2", custom_id="exit")
@@ -337,12 +352,14 @@ class timeclock(commands.Cog):
 
             # break loop if user confirms verification
             if choice.component.custom_id == "exit":
-                await dm.send("Timeclock edit canceled.")
+                embed = Embed(title="Timeclock edit canceled.", color=0x000FF)
+                await dm.send(embed)
                 return
 
             elif choice.component.custom_id == "send":
-                if self.db.check_timestamp_collision(new_dt, in_time, out_time, discord_id, guild_id):
-                    await dm.send("This new time would collide with a previous entry in your timesheet")
+                if self.db.check_timestamp_collision_change(new_dt, in_time, out_time, discord_id, guild_id):
+                    embed = Embed(title="This new time would collide with a previous entry in your timesheet", color=0x000FF)
+                    await dm.send(embed)
                     continue
 
                 try_again = False
@@ -351,9 +368,9 @@ class timeclock(commands.Cog):
                 if choice1.values[0] == "in":
                     # verify replacement does not cause in_time to come after out_time resulting in negative hours
                     if new_dt.astimezone(tzp) > out_time.astimezone(tzp):
-                        await dm.send(
-                            "This would result in your in time coming after your out time. \
-                            Please try again with a valid in time.")
+                        embed = Embed(title="This would result in your in time coming after your out time. \
+                            Please try again with a valid in time.", color=0x000FF)
+                        await dm.send(embed)
                         # restart loop
                         try_again = True
                         continue
@@ -364,7 +381,8 @@ class timeclock(commands.Cog):
                         seconds = total.seconds
                         new_val = {"$set": {'in_time': new_dt, 'seconds_worked': seconds}}
                         records.update_one({'discord_id': discord_id, 'out_time': out_time}, new_val)
-                        await dm.send("You have updated this entry!")
+                        embed = Embed(title="You have updated this entry!", color=0x000FF)
+                        await dm.send(embed)
 
                     else:
                         # open dm with boss for verification
@@ -458,8 +476,9 @@ class timeclock(commands.Cog):
 
                 elif choice1.values[0] == "out":
                     if in_time.astimezone(tzp) > new_dt.astimezone(tzp):
-                        await dm.send("This would result in your in time coming after your out time. \
-                            Please try again with a valid in time.")
+                        embed = Embed(title="This would result in your in time coming after your out time. \
+                        Please try again with a valid in time.", color=0x000FF)
+                        await dm.send(embed)
                         # restart loop
                         try_again = True
                         continue
@@ -469,7 +488,8 @@ class timeclock(commands.Cog):
                         seconds = total.seconds
                         new_val = {"$set": {'out_time': new_dt, 'seconds_worked': seconds}}
                         records.update_one({'discord_id': discord_id, 'in_time': in_time}, new_val)
-                        await dm.send("You have updated this entry!")
+                        embed = Embed(title="You have updated this entry!", color=0x000FF)
+                        await dm.send(embed)
 
                     else:
                         # open dm with boss for verification
@@ -790,7 +810,7 @@ class timeclock(commands.Cog):
                 return
 
             dm = await ctx.author.create_dm()
-            await dm.send("You have been clocked in for 10 hours. Is this intentional?", components=[
+            await dm.send("You have been clocked in for a long time. Is this intentional?", components=[
                   Button(label="No", style="4", custom_id="out"),
                   Button(label="Yes", style="3", custom_id="remain")
             ])
@@ -812,7 +832,7 @@ class timeclock(commands.Cog):
         self.db.clock_user_out(discord_id, guild_id)
         await dm.send(
             "You were clocked out due to the bot suspecting you forgot to clock out. \
-             Please edit this shift to correct your time sheet.")
+             \nPlease edit this shift to correct your time sheet.")
 
     async def get_mng_log(self, ctx):
         # get channel object for manager log
