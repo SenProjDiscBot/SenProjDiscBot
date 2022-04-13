@@ -16,8 +16,6 @@ class pomodoro(commands.Cog):
       await ctx.send("this command does not work in DM's")
       return True
     return False
-    
-      
 
   @commands.command(name='pomodoro')
   async def pomodoro(self, ctx):
@@ -28,24 +26,34 @@ class pomodoro(commands.Cog):
     def check(msg):
       return msg.author == ctx.author and msg.channel == dm
 
-    await dm.send("You are now attempting pomodoro style efficiency")
-    reminder_time = 1
-    convertedTime = (int(reminder_time) * 60)#might need to convert to float
-    pomodoro_25 = convertedTime * 25
-    pomodoro_5 = convertedTime * 5
-  
+    await dm.send("Now entering Pomodoro timer, Please select a task to focus on for 25 minutes!")
+
+    converted_25 = (int(1) * 60)
+    converted_5 = (int(1) * 60)
     i = 0
     while i < 16:
-        pomodoro1(1)
-
-    async def pomodoro1(i):
-      await asyncio.sleep(pomodoro_25)
+      await asyncio.sleep(converted_25)
       await dm.send("please take a 5 minute break")
-      await asyncio.sleep(pomodoro_5)
+      await asyncio.sleep(converted_5)
       await dm.send("Your 5 minute pomodoro break is over, please choose another task to focus on for 25 minutes")
-      i = i +1
-      return i
+      i = i + 1
 
+  @commands.command(name = 'quitpomodoro')
+  async def quitpomodoro(self, ctx):
+    dm = await ctx.author.create_dm()
+    if await self.guild_null(ctx):
+      return
+    
+    def check(msg):
+      return msg.author == ctx.author and msg.channel == dm
+
+    await dm.send("Would you like to exit the Pommodoro timer? (Yes/No)")
+    qr = await self.client.wait_for("message", check=check)
+    if qr.content == 'Yes'or 'yes':
+      await dm.send("You have now exited the Pomodoro Timer!")
+      quit()
+    else:
+      await dm.send("You are still in the Pomodoro timer!")
 
     if await self.guild_null(ctx):
       return
