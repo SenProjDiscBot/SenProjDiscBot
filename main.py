@@ -8,7 +8,7 @@ from discord.ext import commands
 # initializes client all commands start with %
 # case_inseitive ensures case doesn't matter
 
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.members = True
 client = commands.Bot(command_prefix="!", case_insensitive=True, intents=intents)
 
