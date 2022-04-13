@@ -299,6 +299,7 @@ class register(commands.Cog):
                     'timezone': timezone
                 }}
         )
+
         # post verfication in discord channel
         await dm.send("You have updated your information.")
 
