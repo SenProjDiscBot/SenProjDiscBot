@@ -180,9 +180,9 @@ class connect_to_db():
         records = self.client.get_database(str(guild_id)).complete_shifts
 
         # check if discord user is already in the database
-        slice = len(list(records.find({'discord_id': discord_id})))
+        slice = list(records.find({'discord_id': discord_id}))
 
-        if slice > 0:
+        if len(slice) > 0:
             return True
 
         return False
@@ -192,7 +192,7 @@ class connect_to_db():
         afk = self.client.get_database(str(guild_id)).afk
         slice = list(afk.find({'discord_id': id}))
 
-        if slice > 0:
+        if len(slice) > 0:
             return True
 
         return False
