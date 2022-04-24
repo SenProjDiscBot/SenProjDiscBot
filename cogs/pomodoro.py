@@ -1,9 +1,12 @@
 from datetime import datetime
 from http import client
+from msilib.schema import Component
 import time
 from discord.ext import commands
 from discord import DMChannel
+import discord
 import asyncio
+from discord_components import DiscordComponents, Button, SelectOption, Select
 
 
 class pomodoro(commands.Cog):
@@ -16,37 +19,66 @@ class pomodoro(commands.Cog):
       await ctx.send("this command does not work in DM's")
       return True
     return False
-    
-      
-
   @commands.command(name='pomodoro')
   async def pomodoro(self, ctx):
-    dm = await ctx.author.create_dm()
+    if await self.guild_null(ctx):
+      return
+    qrembed4 = discord.Embed(description="Now entering Pomodoro timer, Please select a task to focus on for 25 minutes!", color=0x000FF)
+
+    await ctx.send(embed=qrembed4)
+
+    converted_25 = (int(25) * 60)
+    converted_5 = (int(5) * 60)
+    i = 0
+    while i < 16:
+      await asyncio.sleep(converted_25)
+      qrembed2 = discord.Embed(description="please take a 5 minute break", color=0x000FF)
+      await ctx.send(embed=qrembed2)
+      await asyncio.sleep(converted_5)
+      qrembed3 = discord.Embed(description="Your 5 minute pomodoro break is over, please choose another task to focus on for 25 minutes", color=0x000FF)
+      await ctx.send(embed=qrembed3)
+      i = i + 1
+
+  @commands.command(name = 'quitpomodoro')
+  async def quitpomodoro(self, ctx):
+
     if await self.guild_null(ctx):
       return
     
     def check(msg):
-      return msg.author == ctx.author and msg.channel == dm
+      return msg.author == ctx.author and msg.channel
 
-    await dm.send("You are now attempting pomodoro style efficiency")
-    reminder_time = 1
-    convertedTime = (int(reminder_time) * 60)#might need to convert to float
-    pomodoro_25 = convertedTime * 25
-    pomodoro_5 = convertedTime * 5
-  
-    i = 0
-    while i < 16:
-        pomodoro1(1)
+    qrembed1 = discord.Embed(description="Would you like to end your pomodoro session?", color=0x000FF)
+    await ctx.send(embed=qrembed1)
+    qr = await self.client.wait_for('message', check=check)
 
-    async def pomodoro1(i):
-      await asyncio.sleep(pomodoro_25)
-      await dm.send("please take a 5 minute break")
-      await asyncio.sleep(pomodoro_5)
-      await dm.send("Your 5 minute pomodoro break is over, please choose another task to focus on for 25 minutes")
-      i = i +1
-      return i
+    #await ctx.send(embed=qrembed, components=[
+    #  Button(label="Yes", style="3", custom_id="yes"),
+    #  Button(label="No", style="4", custom_id="no")])
+    #try:
+      #qr = await self.client.wait_for("button_click", timeout=300, check=lambda i: i.custom_id == "yes" or "no")
+    qrembed = discord.Embed(description="You have now exited the Pomodoro Timer!", color=0x000FF)
+    qrembed5 = discord.Embed(description="You are still using the Pomodoro Timer!", color=0x000FF)
+    qrembed6 = discord.Embed(description="you must enter: ' YES '... otherwise you are still using the Pomodoro timer!", color=0x000FF)
 
-
+    if str(qr.content) == "yes":
+        await ctx.send(embed=qrembed)
+        quit()
+    elif str(qr.content) == "Yes":
+        await ctx.send(embed=qrembed)
+        quit()
+    elif str(qr.content) == "YES":
+        await ctx.send(embed=qrembed)
+        quit()
+    elif qr.content == "NO":
+        await ctx.send(embed=qrembed5)
+    elif qr.content == "no":
+        await ctx.send(embed=qrembed5)
+    elif qr.content == "No":
+        await ctx.send(embed=qrembed5)
+    else:
+        await ctx.send(embed=qrembed6)
+      
     if await self.guild_null(ctx):
       return
     

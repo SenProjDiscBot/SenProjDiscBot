@@ -4,6 +4,7 @@ import time
 from discord.ext import commands
 from discord import DMChannel
 import asyncio
+import discord
 class reminder(commands.Cog):
 
   def __init__(self,client):
@@ -25,32 +26,37 @@ class reminder(commands.Cog):
 
     def check(msg):
         return msg.author == ctx.author and msg.channel == dm
-
-    await dm.send("When would you like your reminder(in minutes?) ")
+        
+    embed = discord.Embed(title="When would you like your reminder(in minutes?) ", color=0x000FF)
+    await dm.send(embed=embed)
     rt = await self.client.wait_for("message", check=check)
-    
-    while int(rt.content) <= 0:
-      await dm.send("please enter a positive integer for your reminders timer")
-      rt = await self.client.wait_for("message", check=check)
+    reminder_time = rt.content
 
     while True:
-          try:
+        try:
               is_int = int(rt.content)
+              while int(rt.content) < 0:
+                  await dm.send("Please enter a POSITIVE INTEGER for your reminder time")
+                  rt = await self.client.wait_for("message", check=check)
               break
-          except:
-            await dm.send("Please set a new reminder using an integer as input for time!")
-            await dm.send("When would you like your reminder(in minutes?) ")
-            rt = await self.client.wait_for("message", check=check)
-    
-    reminder_time = rt.content
-    await dm.send("what would you like to be reminded of?")
+        except:
+              embed = discord.Embed(title="Please enter a POSITIVE INTEGER for your reminder time ", color=0x000FF)
+              await dm.send(embed=embed)
+              rt = await self.client.wait_for("message", check=check)
+              reminder_time = int(rt.content)
+
+    embed = discord.Embed(title="What would you like to be reminded of ? ", color=0x000FF)
+    await dm.send(embed=embed)
     rc = await self.client.wait_for("message", check=check)
     reminder_content = rc.content
-    await dm.send("you will be reminded to " + reminder_content + " in " + reminder_time + " minutes! ")
-    convertedTime = (int(reminder_time) * 60)#might need to convert to float
+    embed = discord.Embed(title="you will be reminded to " + reminder_content + " in " + reminder_time + " minutes! ", color=0x000FF)
+    await dm.send(embed=embed)
+    convertedTime = (int(reminder_time) * 60)
     await asyncio.sleep(convertedTime)
-    await dm.send("EZ-Bot was set to remind you to: ")
-    await dm.send(reminder_content)
+    embed = discord.Embed(title="EZ-Bot was set to remind you to: ", color=0x000FF)
+    await dm.send(embed=embed)
+    embed = discord.Embed(title=reminder_content, color=0x000FF)
+    await dm.send(embed=embed)
     if await self.guild_null(ctx):
       return
     
