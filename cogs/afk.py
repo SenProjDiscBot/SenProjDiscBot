@@ -23,7 +23,7 @@ class afk(commands.Cog):
     try:
         # Variable will be true if user was afk previously, false if they weren't
         afkCheck = getAfk(ctx.author.id)
-
+        
         # If user wasnt afk
         if not afkCheck:
             # Checks if user entered a message after running (prefix)afk
@@ -38,7 +38,7 @@ class afk(commands.Cog):
                 #await ctx.send(f"{ctx.author.mention} has gone afk `{message}`.")
                 afkEmbed2 = discord.Embed(description=f"{ctx.author.mention} has gone afk `{message}`.",color=0x000FF)
                 await ctx.send(embed=afkEmbed2)
-
+                
             # Adds [AFK] to users name
             current_nick = ctx.author.nick
 
@@ -60,7 +60,7 @@ class afk(commands.Cog):
             #await ctx.send("you are not afk anymore")
             afkEmbed3 = discord.Embed(title="You are no longer AFK",color=0x000FF)
             await ctx.send(embed=afkEmbed3)
-
+            
 
     except Exception:
         await ctx.send(f"```{traceback.format_exc()}```")
@@ -74,7 +74,7 @@ class afk(commands.Cog):
 
     '''First Check if the author of the message was previously AFK
        If they were, take them off the afk list'''
-
+    
     afkCheck = getAfk(message.author.id)
 
     if afkCheck:
@@ -84,7 +84,7 @@ class afk(commands.Cog):
         await message.reply(embed=afkEmbed4)
         newNick = message.author.nick.replace('[AFK]', '')
         await message.author.edit(nick=newNick)
-
+    
     '''Then check if the message contains a reply or ping mention'''
     mention = message.mentions
 
@@ -131,16 +131,16 @@ def afkOn(userID,message):
         # Writes to file
         file.seek(0)
         json.dump(afkList, file)
-
+        
 # Function that returns users message if user is in AFK list else returns False
 def getAfk(userID):
     # Converts userID from int to string
     userID = str(userID)
-
+    
     with open("afk.json", mode='r+') as file:
         # Returns current file data as a dict
         afkList = json.load(file)
-
+        
         if userID in afkList:
             return True
         else: 
@@ -150,28 +150,28 @@ def getAfk(userID):
 def removeAfk(userID):
     # Converts userID from int to string
     userID = str(userID)
-
+    
     with open("afk.json", mode='r+') as file:
         # Returns current file data as a dict
         afkList = json.load(file)
 
         # Removes current user from dictionary
         del afkList[userID]
-
+        
     with open("afk.json", mode='w') as file:
         # Writes dictionary back to file
         file.seek(0)
         json.dump(afkList, file)
-
+        
 def getMessage(userID):
     userID = str(userID)
-
+    
     with open("afk.json", mode='r+') as file:
         # Returns current file data as a dict
         afkList = json.load(file)
-
+        
         message = afkList[userID]
-
+        
         return message
 
 
