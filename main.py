@@ -1,4 +1,4 @@
-""" Senior Project Discord Bot - Sara White"""
+""" Senior Project Discord Bot - Sara White, Shane Bowman, Daniel Blake"""
 
 import discord
 import json
