@@ -3,18 +3,16 @@ from casino.Deck import Deck
 from casino.Shoe import Shoe
 
 
-class OneCard():
+class OneCard:
     def __init__(self):
         self.players = []
         self.pairs = {}
         self.shoe = Shoe(1)
         self.complete = False
 
-
     def add_player(self, player_name):
         if player_name not in self.players:
             self.players.append(player_name)
-
 
     def deal(self):
         if len(self.pairs) != 0:
@@ -25,10 +23,10 @@ class OneCard():
     def get_hands(self):
         if len(self.pairs) != 0:
             return self.pairs
-    
+
     def get_winner(self):
-        leader = ''
-        leader_card = Card('jkr', 'jkr')
+        leader = ""
+        leader_card = Card("jkr", "jkr")
         if len(self.pairs) != 0:
             for name, card in self.pairs.items():
                 if leader_card.get_oneval() < card.get_oneval():

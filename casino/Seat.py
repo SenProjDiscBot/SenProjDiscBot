@@ -1,14 +1,12 @@
-
-
 from multiprocessing import pool
 
 
-class Seat():
+class Seat:
     def __init__(self):
         self.cards = []
         self.bet = 0
         self.pool = 0
-        self.bust= False
+        self.bust = False
         self.stay = False
         self.discord_id = "Empty"
         self.nickname = "Empty"
@@ -22,7 +20,7 @@ class Seat():
 
     def get_bet(self):
         return self.bet
-    
+
     def get_bet(self):
         return self.bet
 
@@ -30,13 +28,13 @@ class Seat():
         if self.pool >= bet:
             self.bet = self.bet + bet
             self.pool = self.pool - bet
-    
+
     def get_pool(self):
         return self.pool
 
     def set_pool(self, pool):
         self.pool = pool
-    
+
     def is_bust(self):
         return self.bust
 
@@ -51,13 +49,13 @@ class Seat():
 
     def get_disc_id(self):
         return self.discord_id
-    
+
     def set_disc_id(self, id):
         self.discord_id = id
 
     def get_nic(self):
         return self.nickname
-    
+
     def set_nic(self, nic):
         self.nickname = nic
 
@@ -77,7 +75,7 @@ class Seat():
         self.cards = []
         self.bet = 0
         self.pool = 0
-        self.bust= False
+        self.bust = False
         self.stay = False
         self.discord_id = "Empty"
         self.nickname = "Empty"

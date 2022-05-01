@@ -5,14 +5,14 @@ from discord.ext import commands
 
 # Start of commandslist class
 class commandslist(commands.Cog):
+    def __init__(self, client):
+        self.client = client
 
-  def __init__(self,client):
-    self.client = client
-
-  # Command that will show the user the active commands and provide a description of what they do
-  @commands.command()
-  async def commands(self, ctx):
-    List = ["**__Work Commands: Commands to simplify work!__**",
+    # Command that will show the user the active commands and provide a description of what they do
+    @commands.command()
+    async def commands(self, ctx):
+        List = [
+            "**__Work Commands: Commands to simplify work!__**",
             "**!register:** Register yourself in the database so you can track your hours! Run this command in server and the bot will DM you for your information.",
             "**!clockin:** Clock in to work so you can be paid!",
             "**!clockout:** Don't forget to clock out for the day!",
@@ -23,11 +23,14 @@ class commandslist(commands.Cog):
             "**!quitpomodoro:** Run this command to stop the focus timer.",
             "**!weather:** Check the weather for a specific area.",
             "**__Game Commands: Have some fun!__**",
-            "**!flipcoin:** Flip a coin and choose heads or tails."]
-    Desc = '\n\n'.join(List)
-    commandsEmbed = discord.Embed(title = "List of Commands", description = Desc ,color = 0x000FF)
-    await ctx.send(embed=commandsEmbed)
+            "**!flipcoin:** Flip a coin and choose heads or tails.",
+        ]
+        Desc = "\n\n".join(List)
+        commandsEmbed = discord.Embed(
+            title="List of Commands", description=Desc, color=0x000FF
+        )
+        await ctx.send(embed=commandsEmbed)
 
 
 def setup(client):
-  client.add_cog(commandslist(client))
+    client.add_cog(commandslist(client))

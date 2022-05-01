@@ -2,11 +2,12 @@ import random
 from casino.Card import Card
 from casino.Deck import Deck
 
-class Shoe():
+
+class Shoe:
     def __init__(self, num_decks):
         if type(num_decks) != int or num_decks <= 0:
             num_decks = 1
-            
+
         self.stack = []
         self.num_decks = num_decks
         for x in range(int(num_decks)):
@@ -16,10 +17,8 @@ class Shoe():
 
         random.shuffle(self.stack)
 
-    
     def deal_card(self):
         return self.stack.pop()
-
 
     def refresh(self):
         self.stack = []

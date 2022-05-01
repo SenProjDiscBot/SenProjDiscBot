@@ -3,7 +3,13 @@ from datetime import time
 from msilib.schema import Component
 from time import strftime, strptime
 from discord import PermissionOverwrite, Embed
-from discord_components import DiscordComponents, ComponentsBot, Button, SelectOption, Select
+from discord_components import (
+    DiscordComponents,
+    ComponentsBot,
+    Button,
+    SelectOption,
+    Select,
+)
 from discord.ext import commands
 import pymongo
 from connect_to_db import connect_to_db
@@ -16,52 +22,63 @@ from casino.Deck import Deck
 from casino.Shoe import Shoe
 from casino.OneCard import OneCard
 
-class casino(commands.Cog):
 
-    def __init__(self,client):
+class casino(commands.Cog):
+    def __init__(self, client):
         self.client = client
         DiscordComponents(client)
         # connect to mongo db
         print("Casino connecting to mongoDB....")
         self.db = connect_to_db()
-        print("Casino connected to database!")   
+        print("Casino connected to database!")
 
-    @commands.command(name='onecard')
+    @commands.command(name="onecard")
     async def onecard(self, ctx):
         await self.create_emojis(ctx)
         game = OneCard()
         game.add_player(str(ctx.author))
-        end_time = datetime.now() + timedelta(seconds = 10)
+        end_time = datetime.now() + timedelta(seconds=10)
         while datetime.now() < end_time:
-            await ctx.send("The dealer is starting a game of one card high.\nClubs > Spades > Diamonds > Hearts", components = [
-                Button(label="Hit", style="3", custom_id="hit")
-            ])
+            await ctx.send(
+                "The dealer is starting a game of one card high.\nClubs > Spades > Diamonds > Hearts",
+                components=[Button(label="Hit", style="3", custom_id="hit")],
+            )
             # await response
             try:
-                ans = await self.client.wait_for("button_click", timeout=2, check = lambda i: i.custom_id == "hit")
+                ans = await self.client.wait_for(
+                    "button_click", timeout=2, check=lambda i: i.custom_id == "hit"
+                )
                 await self.clear_last_msg(ctx.channel)
                 if self.db.check_active(ans.author, ctx.guild.id):
                     game.add_player(str(ans.author))
             except asyncio.TimeoutError:
                 await self.clear_last_msg(ctx.channel)
                 continue
-        
+
         game.deal()
         hands = game.get_hands()
         records = self.db.get_employee_records(ctx.guild.id)
         embed = Embed(title="Clubs > Spades > Diamonds > Hearts\nResults:")
         for player, card in hands.items():
-            slice = records.find_one({'discord_id' : player})
-            name = slice['name_first']
+            slice = records.find_one({"discord_id": player})
+            name = slice["name_first"]
             emj = await self.get_suit(card.get_suit(), ctx)
-            retStr = "**" + card.get_val() + "**" + emj + " (" + str(card.get_oneval()) + " points)"
-            embed.add_field(name=name,value=retStr)
-                
+            retStr = (
+                "**"
+                + card.get_val()
+                + "**"
+                + emj
+                + " ("
+                + str(card.get_oneval())
+                + " points)"
+            )
+            embed.add_field(name=name, value=retStr)
+
         winner, hand = game.get_winner()
-        slice = records.find_one({'discord_id' : winner})
-        name = slice['name_first']
+        slice = records.find_one({"discord_id": winner})
+        name = slice["name_first"]
         retStr = name + " with a " + hand.get_name()
-        embed.add_field(name="Winner:",value=retStr)
+        embed.add_field(name="Winner:", value=retStr)
         await ctx.send(embed=embed)
 
     async def get_suit(self, suit, ctx):
@@ -73,7 +90,7 @@ class casino(commands.Cog):
                     id = emoji.id
                     return "<:heart:" + str(id) + ">"
         elif suit == "S":
-           for emoji in emojis:
+            for emoji in emojis:
                 if emoji.name == "spade":
                     id = emoji.id
                     return "<:spade:" + str(id) + ">"
@@ -137,10 +154,11 @@ class casino(commands.Cog):
                 f = image.read()
                 b = bytearray(f)
             await ctx.guild.create_custom_emoji(name="back", image=b)
-    
+
     async def clear_last_msg(self, channel):
-        async for x in channel.history(limit = 1):
+        async for x in channel.history(limit=1):
             await x.delete()
+
 
 def setup(client):
     client.add_cog(casino(client))
