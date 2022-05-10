@@ -28,6 +28,24 @@ class pomodoro(commands.Cog):
             color=0x000FF,
         )
 
+        qrembed = discord.Embed(
+            description="You have now exited the Pomodoro Timer!", color=0x000FF
+        )
+        qrembed5 = discord.Embed(
+            description="You are still using the Pomodoro Timer!", color=0x000FF
+        )
+        qrembed6 = discord.Embed(
+            description="Please Confirm! Would you like to Exit Pomodoro Session? (YES/NO)",
+            color=0x000FF,
+        )
+        qrembed2 = discord.Embed(
+            description="please take a 5 minute break, or would you like to end Pomodoro Session? (YES/NO)",
+            color=0x000FF,
+        )
+        qrembed3 = discord.Embed(
+            description="Your 5 minute pomodoro break is over, please choose another task to focus on for 25 minutes, or would you like to end your pomodoro session?(YES/NO)",
+            color=0x000FF,
+        )
         await ctx.send(embed=qrembed4)
 
         converted_25 = int(25) * 60
@@ -40,71 +58,123 @@ class pomodoro(commands.Cog):
 
         while i < 16:
 
-            qrembed = discord.Embed(
-                description="You have now exited the Pomodoro Timer!", color=0x000FF
-            )
-            qrembed5 = discord.Embed(
-                description="You are still using the Pomodoro Timer!", color=0x000FF
-            )
-            qrembed6 = discord.Embed(
-                description="you must enter: ' YES '... otherwise you are still using the Pomodoro timer!",
-                color=0x000FF,
-            )
             await asyncio.sleep(converted_25)
-            qrembed2 = discord.Embed(
-                description="please take a 5 minute break, or would you like to end Pomodoro Session? (YES/NO)",
-                color=0x000FF,
-            )
+
             await ctx.send(embed=qrembed2)
             qr = await self.client.wait_for("message", check=check)
-            if str(qr.content) == "yes":
+
+            if str(qr.content) == str("yes"):
                 await ctx.send(embed=qrembed)
-                i = 16
+                i = 17
                 break
-            elif str(qr.content) == "Yes":
+            elif str(qr.content) == str("Yes"):
                 await ctx.send(embed=qrembed)
-                i = 16
+                i = 17
                 break
-            elif str(qr.content) == "YES":
+            elif str(qr.content) == str("YES"):
                 await ctx.send(embed=qrembed)
-                i = 16
+                i = 17
                 break
-            elif qr.content == "NO":
+            elif str(qr.content) == str("NO"):
                 await ctx.send(embed=qrembed5)
-            elif qr.content == "no":
+            elif str(qr.content) == str("no"):
                 await ctx.send(embed=qrembed5)
-            elif qr.content == "No":
+            elif str(qr.content) == str("No"):
                 await ctx.send(embed=qrembed5)
             else:
                 await ctx.send(embed=qrembed6)
+                qr = await self.client.wait_for("message", check=check)
+                while (
+                    str(qr.content) != str("Yes")
+                    or str("yes")
+                    or str("YES")
+                    or str("NO")
+                    or str("no")
+                    or str("No")
+                ):
+                    await ctx.send(embed=qrembed6)
+                    qr = await self.client.wait_for("message", check=check)
+                    if str(qr.content) == str("yes"):
+                        await ctx.send(embed=qrembed)
+                        i = 17
+                        return i
+                    elif str(qr.content) == str("Yes"):
+                        await ctx.send(embed=qrembed)
+                        i = 17
+                        return i
+                    elif str(qr.content) == str("YES"):
+                        await ctx.send(embed=qrembed)
+                        i = 17
+                        return i
+                    elif str(qr.content) == str("NO"):
+                        await ctx.send(embed=qrembed5)
+                        break
+                    elif str(qr.content) == str("No"):
+                        await ctx.send(embed=qrembed5)
+                        break
+                    elif str(qr.content) == str("no"):
+                        await ctx.send(embed=qrembed5)
+                        break
 
             await asyncio.sleep(converted_5)
-            qrembed3 = discord.Embed(
-                description="Your 5 minute pomodoro break is over, please choose another task to focus on for 25 minutes, or would you like to end your pomodoro session?(YES/NO)",
-                color=0x000FF,
-            )
+
             await ctx.send(embed=qrembed3)
+
             qr = await self.client.wait_for("message", check=check)
-            if str(qr.content) == "yes":
+
+            if str(qr.content) == str("yes"):
                 await ctx.send(embed=qrembed)
-                i = 16
+                i = 17
                 break
-            elif str(qr.content) == "Yes":
+            elif str(qr.content) == str("Yes"):
                 await ctx.send(embed=qrembed)
-                i = 16
+                i = 17
                 break
-            elif str(qr.content) == "YES":
+            elif str(qr.content) == str("YES"):
                 await ctx.send(embed=qrembed)
-                i = 16
+                i = 17
                 break
-            elif qr.content == "NO":
+            elif str(qr.content) == str("NO"):
                 await ctx.send(embed=qrembed5)
-            elif qr.content == "no":
+            elif str(qr.content) == str("no"):
                 await ctx.send(embed=qrembed5)
-            elif qr.content == "No":
+            elif str(qr.content) == str("No"):
                 await ctx.send(embed=qrembed5)
             else:
                 await ctx.send(embed=qrembed6)
+                qr = await self.client.wait_for("message", check=check)
+                while (
+                    str(qr.content) != str("Yes")
+                    or str("yes")
+                    or str("YES")
+                    or str("NO")
+                    or str("no")
+                    or str("No")
+                ):
+                    await ctx.send(embed=qrembed6)
+                    qr = await self.client.wait_for("message", check=check)
+                    if str(qr.content) == str("yes"):
+                        await ctx.send(embed=qrembed)
+                        i = 17
+                        return i
+                    elif str(qr.content) == str("Yes"):
+                        await ctx.send(embed=qrembed)
+                        i = 17
+                        return i
+                    elif str(qr.content) == str("YES"):
+                        await ctx.send(embed=qrembed)
+                        i = 17
+                        return i
+                    elif str(qr.content) == str("NO"):
+                        await ctx.send(embed=qrembed5)
+                        break
+                    elif str(qr.content) == str("No"):
+                        await ctx.send(embed=qrembed5)
+                        break
+                    elif str(qr.content) == str("no"):
+                        await ctx.send(embed=qrembed5)
+                        break
+
             i = i + 1
 
         if await self.guild_null(ctx):
