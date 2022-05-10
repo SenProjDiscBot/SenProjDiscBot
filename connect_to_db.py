@@ -146,11 +146,28 @@ class connect_to_db:
             if not self.check_in(user_id, guild_id):
                 records = self.get_active_shifts(guild_id)
                 in_time = datetime.now(tz=pytz.timezone("UTC"))
-                new_entry = {"discord_id": user_id, "in_time": in_time}
+                timezone = self.get_user_timezone(user_id, guild_id)
+                new_entry = {
+                    "discord_id": user_id,
+                    "in_time": in_time,
+                    "timezone": timezone,
+                }
                 # store employee in the database
                 records.insert_one(new_entry)
                 return True
         return False
+
+    def get_user_timezone(self, user_id, guild_id):
+        timezone = "US/Pacific"
+        if self.check_active(user_id, guild_id):
+            users = self.get_employee_records(guild_id)
+            check = list(
+                users.find({"discord_id": user_id, "timezone": {"$exists": False}})
+            )
+            if len(check) > 0:
+                user = users.find_one({"discord_id": user_id})
+                timezone = user.timezone
+        return timezone
 
     def clock_user_out(self, user_id, guild_id):
         if self.check_in(user_id, guild_id):
