@@ -1,5 +1,5 @@
 from datetime import datetime
-from http import client
+
 import time
 from discord.ext import commands
 from discord import DMChannel
@@ -22,6 +22,7 @@ class weather(commands.Cog):
 
     @commands.command(name="weather")
     async def weather(self, ctx):
+
         if await self.guild_null(ctx):
             return
 
@@ -38,6 +39,7 @@ class weather(commands.Cog):
             + "+weather+today"
         )
         webbrowser.open_new_tab(url)
+
         if await self.guild_null(ctx):
             return
 
